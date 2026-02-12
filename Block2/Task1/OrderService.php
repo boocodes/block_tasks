@@ -36,9 +36,9 @@ class OrderService
      *   'promoCode' => 'WELCOME10|VIP|FREESHIP' (опц.),
      * ]
      */
-    public function createOrder(array $input): array{
-        if(!$this->validateInputData($input))
-        {
+    public function createOrder(array $input): array
+    {
+        if (!$this->validateInputData($input)) {
             return ['ok' => $this->responseStatus, 'error' => $this->responseValue];
         }
         $this->pricingCalculate($input);
@@ -49,6 +49,7 @@ class OrderService
         var_dump($this->order);
         return $this->order;
     }
+
     /**
      * Рассчитывает цену без учета скидки
      *
@@ -65,7 +66,7 @@ class OrderService
      */
     private function pricingCalculate(array &$input): void
     {
-        $this->order['id'] = (string)time() . '-' .rand(1000, 9999);
+        $this->order['id'] = (string)time() . '-' . rand(1000, 9999);
         $this->order['customer'] = [
             'email' => trim((string)$input['customer']['email']),
             'name' => (string)($input['customer']['name'] ?? ''),
@@ -110,9 +111,9 @@ class OrderService
         }
 
         $this->order['delivery'] = [
-          'type' => $deliveryType,
-          'cost' => $deliveryCost,
-          'address' => (string)($delivery['address'] ?? ''),
+            'type' => $deliveryType,
+            'cost' => $deliveryCost,
+            'address' => (string)($delivery['address'] ?? ''),
         ];
         $this->order['pricing']['subtotal'] = $subtotal;
     }
@@ -136,9 +137,9 @@ class OrderService
             } else {
             }
         }
-        $tax = ($subtotal - $discount ) * $this->tax;
-        $total = ($subtotal - $discount ) + $this->tax + $this->order['delivery']['cost'];
-        if($total < 0) $total = 0;
+        $tax = ($subtotal - $discount) * $this->tax;
+        $total = ($subtotal - $discount) + $this->tax + $this->order['delivery']['cost'];
+        if ($total < 0) $total = 0;
         $this->order['pricing']['total'] = $total;
         $this->order['pricing']['discount'] = $discount;
         $this->order['pricing']['tax'] = $tax;
@@ -173,10 +174,10 @@ class OrderService
         $existing = [];
         $now = new DateTimeImmutable();
         $this->order['createdAt'] = $now->format('c');
-        if(file_exists($this->storageFile)) {
+        if (file_exists($this->storageFile)) {
             $raw = file_get_contents($this->storageFile);
             $existing = json_decode($raw, true);
-            if(!is_array($existing)) {
+            if (!is_array($existing)) {
                 $existing = [];
             }
         }
@@ -196,22 +197,21 @@ class OrderService
     private function notifyAdmin(): void
     {
         $msg = 'New order ' . $this->order['id'] . ' total=' . $this->order['pricing']['total'] . ' customer=' . $this->order['customer']['email'] . PHP_EOL;
-        if($this->debug)
-        {
-            error_log('[MAIL to ' . $this->adminEmail . '] '. $msg . PHP_EOL);
+        if ($this->debug) {
+            error_log('[MAIL to ' . $this->adminEmail . '] ' . $msg . PHP_EOL);
         }
     }
 
     private function notifyCustomer(): void
     {
         $msg = 'Thanks! Your order ' . $this->order['id'] . ' total=' . $this->order['pricing']['total'] . PHP_EOL;
-        if($this->debug)
-        {
+        if ($this->debug) {
             error_log('[MAIL to ' . $this->order['customer']['email'] . '] ' . $msg . PHP_EOL);
         }
     }
 
-    private function validateInputData(array $input): bool{
+    private function validateInputData(array $input): bool
+    {
 
         if (!isset($input['customer']['email'])) {
             $this->responseStatus = false;
