@@ -134,7 +134,6 @@ class OrderService
                 }
             } elseif ($promoCode === 'FREESHIP') {
                 $deliveryCost = 0;
-            } else {
             }
         }
         $tax = ($subtotal - $discount) * $this->tax;
