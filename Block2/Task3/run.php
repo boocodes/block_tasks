@@ -38,7 +38,6 @@ try {
         ['name' => 'apple', 'price' => 150.00],
     ];
     $container->get(OrderRepositoryInterface::class)->setOrder($dataOrder);
-
     $reportGenerator = $container->get(ReportGenerator::class);
     $report = $reportGenerator->createReport();
 

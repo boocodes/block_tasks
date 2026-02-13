@@ -27,11 +27,55 @@ class OrderContainer
 
     public function get(string $id)
     {
-        if(!isset($this->factories[$id]))
+        if(isset($this->factories[$id]))
         {
-            throw new BadMethodCallException($id . ' not exist' . '\n');
+            return $this->factories[$id]($this);
         }
-        return $this->factories[$id]($this);
+        try {
+            if(class_exists($id))
+            {
+                return $this->prepareObject($id);
+            }
+        }
+        catch (ReflectionException $e)
+        {
+            echo $e->getMessage();
+        }
+        throw new BadMethodCallException($id . ' does not exist.' . '\n');
+    }
+
+    /**
+     * @throws ReflectionException
+     */
+    private function prepareObject(string $class)
+    {
+        $classReflector = new \ReflectionClass($class);
+        if($classReflector->isInterface() || $classReflector->isAbstract())
+        {
+            throw new ReflectionException('Cannot create an interface or abstract class ' . $class . '.');
+        }
+        $constructorReflector = $classReflector->getConstructor();
+        if(!$constructorReflector)
+        {
+            return new $class();
+        }
+        $constructorArgs = $constructorReflector->getParameters();
+        if(empty($constructorArgs))
+        {
+            return new $class();
+        }
+        $args = [];
+        foreach($constructorArgs as $arg)
+        {
+            $argType = $arg->getType();
+            if($argType)
+            {
+               $argTypeName = $argType->getName();
+               $args[] = $this->get($argTypeName);
+            }
+        }
+        unset($arg);
+        return new $class(...$args);
     }
 
 }
