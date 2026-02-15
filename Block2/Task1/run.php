@@ -1,8 +1,9 @@
 <?php
 
-use Legacy\OrderService;
 
-require_once 'OrderService.php';
+require_once './OrderService.php';
+require_once './OrderValidator.php';
+require_once './Notifier.php';
 
 $order = new OrderService();
 

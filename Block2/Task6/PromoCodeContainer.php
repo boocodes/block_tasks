@@ -82,6 +82,10 @@ class PromoCodeContainer implements PromoCodeInterface {
                 $code();
                 $this->promoCodeCount++;
             }
+            else
+            {
+                break;
+            }
         }
         unset($code);
     }
