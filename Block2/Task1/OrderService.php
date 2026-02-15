@@ -2,7 +2,12 @@
 
 namespace Legacy;
 
+require_once __DIR__ . '/OrderValidator.php';
+require_once __DIR__ . '/Notifier.php';
+
 use DateTimeImmutable;
+use Task\Notifier;
+use Task\OrderValidator;
 
 class OrderService
 {
@@ -11,8 +16,9 @@ class OrderService
     private float $tax = 0.05;
     private array $order = [];
     private string $storageFile;
-    private string $adminEmail;
     private bool $debug;
+    private string $adminEmail;
+
 
     public function __construct()
     {
@@ -38,8 +44,9 @@ class OrderService
      */
     public function createOrder(array $input): array
     {
-        if (!$this->validateInputData($input)) {
-            return ['ok' => $this->responseStatus, 'error' => $this->responseValue];
+        $validator = new OrderValidator();
+        if(!$validator->validate($input)) {
+            return ['ok'=>$validator->getResponseStatus(), 'error'=>$this->responseValue];
         }
         $this->pricingCalculate($input);
         $this->discountCalculate($input);
@@ -121,7 +128,7 @@ class OrderService
     private function discountCalculate(&$input): void
     {
         $discount = 0;
-        $subtotal = $this->order['prising']['subtotal'];
+        $subtotal = $this->order['pricing']['subtotal'];
         $promoCode = isset($input['promoCode']) ? strtoupper(trim((string)$input['promoCode'])) : '';
         if ($promoCode !== '') {
             if ($promoCode === 'WELCOME10') {
@@ -184,58 +191,14 @@ class OrderService
         file_put_contents($this->storageFile, json_encode($existing, JSON_PRETTY_PRINT));
         $this->responseStatus = true;
         $this->responseValue = $this->order;
+        $notifier = new Notifier($this->order['customer']['email'], $this->adminEmail, true);
+        $customerMessage = 'Thanks! Your order ' . $this->order['id'] . ' total=' . $this->order['pricing']['total'] . PHP_EOL;
+        $adminMessage = 'New order ' . $this->order['id'] . ' total=' . $this->order['pricing']['total'] . ' customer=' . $this->order['customer']['email'] . PHP_EOL;
+        $notifier->notifyCustomer($customerMessage);
+        $notifier->notifyAdmin($adminMessage);
 
     }
 
-    private function notification(): void
-    {
-        $this->notifyAdmin();
-        $this->notifyCustomer();
-    }
-
-    private function notifyAdmin(): void
-    {
-        $msg = 'New order ' . $this->order['id'] . ' total=' . $this->order['pricing']['total'] . ' customer=' . $this->order['customer']['email'] . PHP_EOL;
-        if ($this->debug) {
-            error_log('[MAIL to ' . $this->adminEmail . '] ' . $msg . PHP_EOL);
-        }
-    }
-
-    private function notifyCustomer(): void
-    {
-        $msg = 'Thanks! Your order ' . $this->order['id'] . ' total=' . $this->order['pricing']['total'] . PHP_EOL;
-        if ($this->debug) {
-            error_log('[MAIL to ' . $this->order['customer']['email'] . '] ' . $msg . PHP_EOL);
-        }
-    }
-
-    private function validateInputData(array $input): bool
-    {
-
-        if (!isset($input['customer']['email'])) {
-            $this->responseStatus = false;
-            $this->responseValue = 'customer email required';
-            return false;
-        };
-        $email = trim((string)$input['customer']['email']);
-        if ($email === '' || !str_contains($email, '@')) {
-            $this->responseStatus = false;
-            $this->responseValue = 'customer email required';
-            return false;
-        };
-        if (!isset($input['items']) || !is_array($input['items']) || count($input['items']) === 0) {
-            $this->responseStatus = false;
-            $this->responseValue = 'items required';
-            return false;
-        };
-        $card = isset($input['payment']['cardNumber']) ? preg_replace('/\s+/', '', (string)$input['payment']['cardNumber']) : '';
-        if (strlen($card) < 12 && $input['payment']['method'] === 'card') {
-            $this->responseStatus = false;
-            $this->responseValue = 'card number required';
-            return false;
-        }
-        return true;
-    }
 
 
     private function ensureStorageDir(): void

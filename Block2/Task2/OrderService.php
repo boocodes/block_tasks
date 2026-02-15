@@ -14,16 +14,23 @@ class OrderService
 
     public function createOrder(OrderRequest $orderRequest): OrderEntity|bool
     {
-        if(!$this->validateInput($orderRequest)) return false;
+        if (!$this->validateInput($orderRequest)) return false;
 
         $orderId = (string)time() . '-' . rand(1000, 9999);
         try {
-            $orderValuesObject = new OrderValueObjects($orderRequest->customer['email'], $orderRequest->payment['currency'], 0, $orderId);
+            $orderValuesObject = new OrderValueObjects($orderRequest->customer['email'],
+                $orderRequest->payment['currency'],
+                0,
+                $orderId
+            );
 
-            foreach ($orderRequest->items as $item)
-            {
+            foreach ($orderRequest->items as $item) {
                 $item['price'] = isset($item['price']) ? (float)$item['price'] : 0.0;
-                $orderValuesObject = $orderValuesObject->add(new OrderValueObjects($orderRequest->customer['email'], $orderRequest->payment['currency'], $item['price'], $orderId));
+                $orderValuesObject = $orderValuesObject->add(new OrderValueObjects($orderRequest->customer['email'],
+                        $orderRequest->payment['currency'],
+                        $item['price'],
+                        $orderId)
+                );
             }
             unset($item);
 
@@ -34,17 +41,14 @@ class OrderService
             $orderEntity->markPaid();
             var_dump($orderEntity->getOrder());
             return $orderEntity;
-        }
-        catch (Exception $e)
-        {
+        } catch (Exception $e) {
             return false;
         }
     }
 
     private function validateInput(&$input): bool
     {
-        if(!isset($input->payment['currency']))
-        {
+        if (!isset($input->payment['currency'])) {
             return false;
         }
         if (!isset($input->customer['email'])) {
