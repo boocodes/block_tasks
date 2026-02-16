@@ -14,14 +14,17 @@ class Request
         $this->headers = $headers;
         $this->inputData = $inputData;
     }
+
     public function getHeaders(): array
     {
         return $this->headers;
     }
+
     public function getInputData(): false|string
     {
         return $this->inputData;
     }
+
     public function getTestData(): string|false
     {
         return $this->testData;

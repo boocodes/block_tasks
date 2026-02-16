@@ -57,11 +57,56 @@ class TaskRepository implements TaskRepositoryInterface
         return json_decode($data, true);
     }
 
-    public function updateTask(string $id, string $title = "", string $description = ""): bool
+    public function getTasksWithCursorPaginationRule(string|null $status, int $limit, string|null $cursor): array
+    {
+        $taskList = $this->getTasks();
+
+        if ($status !== null) {
+            $taskList = array_filter($taskList, function ($task) use ($status) {
+                return strtolower($task['status']) === strtolower($status);
+            });
+        }
+
+        usort($taskList, function ($a, $b) {
+            return strtotime($b['created_at']) <=> strtotime($a['created_at']);
+        });
+
+        if ($cursor !== null) {
+            $cursorTasks = [];
+            $founded = false;
+
+            foreach ($taskList as $task) {
+                if ($founded) {
+                    $cursorTasks[] = $task;
+                } else if (isset($task['id']) && (string)$task['id'] === (string)$cursor) {
+                    $founded = true;
+                }
+            }
+            $taskList = $cursorTasks;
+            unset($task);
+        }
+        $data = array_slice($taskList, 0, $limit);
+        $nextCursor = null;
+        $hasMore = count($taskList) > $limit;
+        if ($hasMore && !empty($data)) {
+            $lastItem = end($data);
+            $nextCursor = isset($lastItem['id']) ? (string)$lastItem['id'] : null;
+        }
+
+        return [
+            'data' => $data,
+            'next_cursor' => $nextCursor,
+            'has_more' => $hasMore,
+            'limit' => $limit,
+        ];
+
+    }
+
+    public function updateTask(string $id, null|string $title = "", null|string $description = ""): bool
     {
         $data = json_decode(file_get_contents($this->getJsonStoragePath()), true);
-        foreach ($data as $task) {
-            if ($task['id'] === $id) {
+        foreach ($data as &$task) {
+            if ($task['id'] == $id) {
                 $task['title'] = $title ?? $task['title'];
                 $task['description'] = $description ?? $task['description'];
                 file_put_contents($this->getJsonStoragePath(), json_encode($data));
@@ -71,17 +116,23 @@ class TaskRepository implements TaskRepositoryInterface
         unset($task);
         return false;
     }
+
     public function deleteTask(string $id): bool
     {
         $data = json_decode(file_get_contents($this->getJsonStoragePath()), true);
-        foreach ($data as $task) {
-            if ($task['id'] === $id) {
-                unset($task);
+        $previousSize = count($data);
+        foreach ($data as $task => $value) {
+            if ($value['id'] == $id) {
+                unset($data[$task]);
             }
-            file_put_contents($this->getJsonStoragePath(), json_encode($data));
-            return true;
         }
         unset($task);
-        return false;
+        if ($previousSize > count($data)) {
+            file_put_contents($this->getJsonStoragePath(), json_encode($data, JSON_PRETTY_PRINT));
+            return true;
+        } else {
+            return false;
+        }
+
     }
 }
