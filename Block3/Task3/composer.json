@@ -1,0 +1,19 @@
+{
+    "name": "java2/task2",
+    "autoload": {
+        "psr-4": {
+            "Task2\\": "src/",
+            "Task2\\Core\\": "src/Core/",
+            "Task2\\Application\\": "src/Application/",
+            "Task2\\Domain\\": "src/Domain/",
+            "Task2\\Infrastructure\\": "src/Infrastructure/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Nick Felker",
+            "email": "felker.nick@bk.ru"
+        }
+    ],
+    "require": {}
+}
