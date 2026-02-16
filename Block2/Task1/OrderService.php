@@ -2,12 +2,7 @@
 
 namespace Legacy;
 
-require_once __DIR__ . '/OrderValidator.php';
-require_once __DIR__ . '/Notifier.php';
-
 use DateTimeImmutable;
-use Task\Notifier;
-use Task\OrderValidator;
 
 class OrderService
 {

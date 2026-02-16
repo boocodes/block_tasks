@@ -1,6 +1,6 @@
 <?php
 
-namespace Task;
+namespace Legacy;
 
 class OrderValidator
 {

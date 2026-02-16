@@ -1,0 +1,41 @@
+<?php return array(
+    'root' => array(
+        'name' => 'java2/task1',
+        'pretty_version' => 'dev-main',
+        'version' => 'dev-main',
+        'reference' => 'd3ff0ccf9f279952c49d762b6fe9ad296f6d3232',
+        'type' => 'library',
+        'install_path' => __DIR__ . '/../../',
+        'aliases' => array(),
+        'dev' => true,
+    ),
+    'versions' => array(
+        'java2/task1' => array(
+            'pretty_version' => 'dev-main',
+            'version' => 'dev-main',
+            'reference' => 'd3ff0ccf9f279952c49d762b6fe9ad296f6d3232',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../../',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
+        'symfony/http-foundation' => array(
+            'pretty_version' => 'v8.0.5',
+            'version' => '8.0.5.0',
+            'reference' => 'e3422806e6f6760dbed0ddbc0a7fbfb6b5ce96bb',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../symfony/http-foundation',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
+        'symfony/polyfill-mbstring' => array(
+            'pretty_version' => 'v1.33.0',
+            'version' => '1.33.0.0',
+            'reference' => '6d857f4d76bd4b343eac26d6b539585d2bc56493',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../symfony/polyfill-mbstring',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
+    ),
+);

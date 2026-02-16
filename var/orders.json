@@ -248,5 +248,55 @@
             "status": "cash_on_delivery"
         },
         "createdAt": "2026-02-13T19:43:02+00:00"
+    },
+    {
+        "id": "1771190453-8991",
+        "customer": {
+            "email": "example@mail.ru",
+            "name": "test"
+        },
+        "items": [
+            {
+                "sku": "A1",
+                "title": "Carrot",
+                "price": 200,
+                "qty": 1
+            },
+            {
+                "sku": "A1",
+                "title": "Potato",
+                "price": 200,
+                "qty": 1
+            },
+            {
+                "sku": "A1",
+                "title": "Melon",
+                "price": 1000,
+                "qty": 1
+            },
+            {
+                "sku": "A1",
+                "title": "Apple",
+                "price": 150,
+                "qty": 1
+            }
+        ],
+        "delivery": {
+            "type": "pickup",
+            "cost": 0,
+            "address": ""
+        },
+        "pricing": {
+            "subtotal": 1550,
+            "total": 1550.05,
+            "discount": 0,
+            "tax": 77.5,
+            "promoCode": ""
+        },
+        "payment": {
+            "method": "cash",
+            "status": "cash_on_delivery"
+        },
+        "createdAt": "2026-02-15T21:20:53+00:00"
     }
 ]

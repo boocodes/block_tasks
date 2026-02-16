@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Task;
+namespace Legacy;
 
 class Notifier
 {

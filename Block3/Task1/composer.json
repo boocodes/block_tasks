@@ -1,0 +1,17 @@
+{
+    "name": "java2/task1",
+    "autoload": {
+        "psr-4": {
+            "API\\": "API"
+        }
+    },
+    "authors": [
+        {
+            "name": "Nick Felker",
+            "email": "felker.nick@bk.ru"
+        }
+    ],
+    "require": {
+        "symfony/http-foundation": "^8.0"
+    }
+}
