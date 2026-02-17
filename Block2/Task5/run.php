@@ -19,7 +19,7 @@ $data = [
 $orderService = new OrderService();
 
 
-$serviceLocator = new ServiceLocator();
+$serviceLocator = new DIContainer();
 $serviceLocator->setObject('validator', new OrderValidate());
 $serviceLocator->setObject('notifier', new Notifier("admin@mail.ru", $data['email'], true));
 $serviceLocator->setObject('file', new OrderFile());

@@ -4,34 +4,58 @@
 namespace Task2;
 class OrderEntity
 {
-    private array $order;
+    private string $status;
+    private string $customerEmail;
+    private string $orderId;
+    private float $totalAmount;
+    private string $currency;
+    private array $items;
 
-    public function __construct(OrderId $orderId, Price $orderPrice, Email $email, array $items)
+    public function __construct(OrderId $orderId, Email $email, array $items, string $currency)
     {
-        $this->order['customer']['email'] = $email->getEmail();
-        $this->order['id'] = $orderId->getId();
-        $this->order['pricing']['total'] = $orderPrice->getAmount();
-        $this->order['pricing']['currency'] = $orderPrice->getCurrency();
-        $this->order['items'] = $items;
+        $this->status = 'new';
+        $this->customerEmail = $email->getEmail();
+        $this->orderId = $orderId->getId();
+        $this->totalAmount = 0;
+        $this->currency = $currency;
+        $this->items = $items;
     }
 
     public function getOrder(): array
     {
-        return $this->order;
+        return [
+            'status' => $this->status,
+            'customer' => ['email' => $this->customerEmail],
+            'orderId' => $this->orderId,
+            'pricing' => [
+                'totalAmount' => $this->totalAmount,
+                'currency' => $this->currency
+            ],
+            'items' => $this->items
+        ];
     }
 
-    public function setId(string $id): void
+    public function markPaid(): array
     {
-        $this->order['id'] = $id;
+        if($this->status == 'new')
+        {
+            $this->totalAmount = 0;
+            $this->calculateTotal();
+            $this->status = 'paid';
+        }
+        return $this->getOrder();
     }
-    public function setItems(array $items): void
+    public function calculateTotal(): float
     {
-        $this->order['items'] = $items;
-    }
 
-    public function setTotal(float $total): void
-    {
-        $this->order['pricing']['total'] = $total;
+        if(empty($this->items)) return 0.0;
+        foreach ($this->items as $item) {
+            $item['price'] = isset($item['price']) ? (float)$item['price'] : 0.0;
+            $this->totalAmount += $item['price'] * $item['qty'];
+        }
+        unset($item);
+        $orderPrice = new Price($this->totalAmount, $this->currency);
+        return $this->totalAmount;
     }
 
 }

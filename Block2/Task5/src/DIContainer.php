@@ -2,7 +2,7 @@
 
 namespace Task5;
 
-final class ServiceLocator
+final class DIContainer
 {
     private array $services = [];
     private array $factories = [];
