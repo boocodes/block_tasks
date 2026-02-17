@@ -1,7 +1,8 @@
 <?php
+namespace Api;
 require_once './vendor/autoload.php';
-use API\App;
 
+use API\App;
 
 App::run();
 

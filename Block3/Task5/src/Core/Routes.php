@@ -1,7 +1,6 @@
 <?php
 
-namespace API;
-
+namespace Task5\Core;
 
 
 class Routes
@@ -10,10 +9,22 @@ class Routes
     {
         App::addGetController($url, $callback);
     }
+
     public static function post(string $url, callable $callback): void
     {
         App::addPostController($url, $callback);
     }
+
+    public static function patch(string $url, callable $callback): void
+    {
+        App::addPatchController($url, $callback);
+    }
+
+    public static function delete(string $url, callable $callback): void
+    {
+        App::addDeleteController($url, $callback);
+    }
+
     public static function pageNotFound(callable $callback): void
     {
         App::setNotFoundController($callback);

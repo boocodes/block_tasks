@@ -1,15 +1,15 @@
 <?php
 
-namespace Task2\Core;
+namespace Task5\Core;
 
 
 use DateTime;
-use Task2\Core\Request;
-use Task2\Core\Routes;
-use Task2\Core\Sender;
-use Task2\Infrastructure\TaskRepository;
-use Task2\Application\DTO\Task;
-use Task2\Domain\Enums\StatusEnum;
+use Task5\Core\Request;
+use Task5\Core\Routes;
+use Task5\Core\Sender;
+use Task5\Infrastructure\TaskRepository;
+use Task5\Application\DTO\Task;
+use Task5\Domain\Enums\StatusEnum;
 
 Routes::post('/tasks', function (Request $request) {
     $inputJson = json_decode($request->getInputData(), true);

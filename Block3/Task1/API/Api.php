@@ -2,6 +2,7 @@
 
 namespace API;
 
+use API\Sender;
 
 
 Routes::get('/health', function (Request $request) {

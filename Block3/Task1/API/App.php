@@ -4,8 +4,6 @@ namespace API;
 
 require_once 'Api.php';
 
-use API\Request;
-
 class App
 {
     private function __construct()
