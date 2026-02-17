@@ -1,15 +1,14 @@
 <?php
 
-namespace Legacy\God;
+namespace Task5;
 
 use DateTimeImmutable;
-use Legacy\God\OrderValidate;
-use Legacy\God\Notifier;
-require_once 'OrderValidate.php';
-require_once 'Notifier.php';
 
-class GodClass
+class OrderService
 {
+    private Notifier $notifier;
+    private OrderValidate $validate;
+    private OrderFile $orderFile;
     public array $config = [];
     public array $orders = [];
     public array $users = [];
@@ -28,16 +27,18 @@ class GodClass
             $data = json_decode((string)$raw, true);
             if (is_array($data)) {
                 $this->orders = $data['orders'] ?? [];
-                $this->users  = $data['users'] ?? [];
+                $this->users = $data['users'] ?? [];
             }
         }
     }
 
-    public function process(array $input): array
+    public function process(array $input, ?OrderValidate $validate, ?Notifier $notifier, ?OrderFile $orderFile): array
     {
-        $validate = new OrderValidate();
-        if(!$validate->validate($input)){
-            return ['ok' => $validate->getStatusResponse(), 'error'=>$validate->getValueResponse()];
+        if ($validate !== null) {
+            $this->validate = $validate;
+            if (!$this->validate->validate($input)) {
+                return ['ok' => $validate->getStatusResponse(), 'error' => $validate->getValueResponse()];
+            }
         }
         $email = trim((string)$input['email']);
         if (!isset($this->users[$email])) {
@@ -54,7 +55,7 @@ class GodClass
 
         foreach ($items as $item) {
             $price = (float)($item['price'] ?? 0);
-            $qty   = (int)($item['qty'] ?? 1);
+            $qty = (int)($item['qty'] ?? 1);
             if ($qty < 1) $qty = 1;
             $subtotal += $price * $qty;
         }
@@ -81,34 +82,26 @@ class GodClass
             'discount' => $discount,
             'tax' => $tax,
             'total' => $total,
-            'createdAt' => (new DateTimeImmutable())->format('c'),
+            'createdAt' => new DateTimeImmutable()->format('c'),
         ];
 
         $this->orders[] = $order;
         $this->users[$email]['orders']++;
 
-        $this->save();
+        if ($orderFile !== null) {
+            $this->orderFile = $orderFile;
+            $this->orderFile->save(['users' => $this->users, 'orders' => $this->orders]);
+        }
 
-        $notifier = new Notifier($this->config['admin_email'], $email, $this->debug);
-        $notifier->notifyAdmin("[ADMIN {$this->config['admin_email']}] New order {$order['id']} total={$order['total']}");
-        $notifier->notifyUser("[USER {$order['email']}] Your order {$order['id']} created, total={$order['total']}");
+        if ($notifier !== null) {
+            $this->notifier = $notifier;
+            $notifier->notifyAdmin("[ADMIN {$this->config['admin_email']}] New order {$order['id']} total={$order['total']}");
+            $notifier->notifyUser("[USER {$order['email']}] Your order {$order['id']} created, total={$order['total']}");
+        }
         return [
             'ok' => true,
             'order' => $order,
         ];
-    }
-
-    private function save(): void
-    {
-        $data = [
-            'users' => $this->users,
-            'orders' => $this->orders,
-        ];
-
-        file_put_contents(
-            $this->config['storage'],
-            json_encode($data, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT)
-        );
     }
 
 }

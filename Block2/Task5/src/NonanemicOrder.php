@@ -1,10 +1,12 @@
 <?php
 
-namespace Legacy;
+namespace Task5;
 
 class NonanemicOrder
 {
     private string $id;
+    private Notifier $notifier;
+    private OrderFile $orderFile;
     private string $customerEmail;
     private array $items = [];
     private float $subtotal = 0.0;
@@ -14,11 +16,11 @@ class NonanemicOrder
     private string $status;
     private string $createdAt;
 
-    public function __construct(array $items,)
+    public function __construct(array $items, string $customerEmail)
     {
         $this->items = $items;
-        $this->id = '';
-        $this->customerEmail = '';
+        $this->id = uniqid();
+        $this->customerEmail = $customerEmail;
         $this->status = 'new';
         $this->createdAt = date('c');
     }
@@ -56,12 +58,13 @@ class NonanemicOrder
         $this->calculcateSubtotal();
         $this->calculateTotal();
         $this->status = 'paid';
+        $this->save();
     }
     private function calculcateSubtotal(): void
     {
         $this->subtotal = 0.0;
         foreach ($this->items as $item) {
-            $this->subtotal += $item['price'] * $item['quantity'] ?? 1;
+            $this->subtotal += $item['price'] * $item['qty'] ?? 1;
         }
         unset($item);
     }
@@ -94,7 +97,6 @@ class NonanemicOrder
                 'status' => $this->status,
                 'createdAt' => $this->createdAt,
             ];
-            var_dump($result);
         }
     }
 }

@@ -1,6 +1,6 @@
 <?php
 
-namespace Legacy\God;
+namespace Task5;
 
 class OrderValidate
 {
@@ -32,5 +32,6 @@ class OrderValidate
             $this->valueResponse = 'email invalid';
             return false;
         }
+        return true;
     }
 }

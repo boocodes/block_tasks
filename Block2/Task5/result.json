@@ -1,0 +1,32 @@
+{
+    "users": {
+        "test@mail.ru": {
+            "email": "test@mail.ru",
+            "createdAt": "2026-02-17T04:33:42+00:00",
+            "orders": 1
+        }
+    },
+    "orders": [
+        {
+            "id": "ord_6993efa6680861.51980731",
+            "email": "test@mail.ru",
+            "items": [
+                {
+                    "name": "Melon",
+                    "price": 100,
+                    "qty": 1
+                },
+                {
+                    "name": "Apple",
+                    "price": 200,
+                    "qty": 1
+                }
+            ],
+            "subtotal": 300,
+            "discount": 30,
+            "tax": 13.5,
+            "total": 283.5,
+            "createdAt": "2026-02-17T04:33:42+00:00"
+        }
+    ]
+}

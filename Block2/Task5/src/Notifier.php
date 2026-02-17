@@ -1,6 +1,6 @@
 <?php
 
-namespace Legacy\God;
+namespace Task5;
 
 
 class Notifier
@@ -28,7 +28,7 @@ class Notifier
     }
     public function notifyAdmin(string $message): void
     {
-        if ($this->debug) {
+        if ($this->debugFlag) {
             error_log(
                 $message,
             );
@@ -36,7 +36,7 @@ class Notifier
     }
     public function notifyUser(string $message): void
     {
-        if ($this->debug) {
+        if ($this->debugFlag) {
             error_log(
                 $message,
             );
