@@ -1,6 +1,6 @@
 <?php
 
-namespace Legacy;
+namespace Task6;
 
 use DateTimeImmutable;
 
@@ -12,7 +12,7 @@ class OrderService
 
     public function __construct()
     {
-        $this->storageFile = __DIR__ . '/../../var/orders.json';
+        $this->storageFile = __DIR__ . '/../data.json';
         $this->adminEmail = 'admin@example.com';
         $this->debug = true;
     }
@@ -32,7 +32,7 @@ class OrderService
      *   'promoCode' => 'WELCOME10|VIP|SHIPFREE' (опц.),
      * ]
      */
-    public function createOrder(array $input): array
+    public function createOrder(array $input, PromoCodeContainer $promoCodeContainer): array
     {
         if (!isset($input['customer']['email'])) {
             return ['ok' => false, 'error' => 'customer email required'];
@@ -84,12 +84,6 @@ class OrderService
             $deliveryCost = 199;
         }
         $discount = 0;
-        $promoCodeObject = new PromoCodeContainer(2, $discount, $deliveryCost, $subtotal);
-        $promoCodeObject->parsePromoCodes($input['promoCode']);
-        $promoCodeObject->applyPromoCodes();
-        $discount = $promoCodeObject->getDiscount();
-        $subtotal = $promoCodeObject->getSubtotal();
-        $deliveryCost = $promoCodeObject->getDeliveryCost();
 
         $tax = ($subtotal - $discount) * 0.05;
         $total = ($subtotal - $discount) + $tax + $deliveryCost;
@@ -140,6 +134,9 @@ class OrderService
                 'promoCode' => isset($input['promoCode']) ? strtoupper(trim((string)$input['promoCode'])) : '',
             ],
         ];
+
+        $promoCodeContainer->parsePromoCodes($input['promoCode']);
+        $promoCodeContainer->applyPromoCodes($order);
 
         $this->ensureStorageDir();
 

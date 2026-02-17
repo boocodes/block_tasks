@@ -1,8 +1,7 @@
 <?php
 
-namespace Legacy;
+namespace Task6;
 
-use Legacy\PromoCodeContainer;
 use DateTimeImmutable;
 
 class GodClass
@@ -30,7 +29,7 @@ class GodClass
         }
     }
 
-    public function process(array $input): array
+    public function process(array $input, PromoCodeContainer $promoCodeContainer): array
     {
         if (empty($input['email'])) {
             return ['ok' => false, 'error' => 'email required'];
@@ -63,9 +62,7 @@ class GodClass
         $discount = 0;
 
         $deliveryCost = 0;
-        $promoCodeContainer = new PromoCodeContainer(2, $discount, $deliveryCost, $subtotal);
-        $promoCodeContainer->parsePromoCodes($input['promo']);
-        $promoCodeContainer->applyPromoCodes();
+
         $discount = $promoCodeContainer->getDiscount();
         $deliveryCost = $promoCodeContainer->getDeliveryCost();
         $subtotal = $promoCodeContainer->getSubtotal();
@@ -87,6 +84,8 @@ class GodClass
             'total' => $total,
             'createdAt' => (new DateTimeImmutable())->format('c'),
         ];
+        $promoCodeContainer->parsePromoCodes($input['promoCode']);
+        $promoCodeContainer->applyPromoCodes($order);
 
         $this->orders[] = $order;
         $this->users[$email]['orders']++;

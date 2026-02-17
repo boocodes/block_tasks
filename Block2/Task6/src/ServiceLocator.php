@@ -1,6 +1,6 @@
 <?php
 
-namespace Legacy;
+namespace Task6;
 
 final class ServiceLocator
 {
