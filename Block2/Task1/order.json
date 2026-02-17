@@ -36,5 +36,43 @@
             "status": "cash_on_delivery"
         },
         "createdAt": "2026-02-17T02:35:54+00:00"
+    },
+    {
+        "id": "1771299272-7942",
+        "customer": {
+            "email": "example@mail.ru",
+            "name": "test"
+        },
+        "items": [
+            {
+                "sku": "A1",
+                "title": "Carrot",
+                "price": 200,
+                "qty": 1
+            },
+            {
+                "sku": "A1",
+                "title": "Potato",
+                "price": 200,
+                "qty": 1
+            }
+        ],
+        "pricing": {
+            "subtotal": 400,
+            "total": 599,
+            "discount": 0,
+            "tax": 0,
+            "promoCode": ""
+        },
+        "delivery": {
+            "type": "courier",
+            "cost": 199,
+            "address": ""
+        },
+        "payment": {
+            "method": "cash",
+            "status": "cash_on_delivery"
+        },
+        "createdAt": "2026-02-17T03:34:32+00:00"
     }
 ]

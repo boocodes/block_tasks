@@ -1,12 +1,7 @@
 <?php
+
+namespace Task1;
 require_once "vendor/autoload.php";
-
-use Task1\Notifier;
-use Task1\OrderFile;
-use Task1\OrderService;
-use Task1\OrderValidator;
-use Task1\PromoCode;
-
 
 
 $inputOrderData = [
@@ -23,8 +18,8 @@ $inputOrderData = [
 
 $orderValidator = new OrderValidator();
 
-if(!$orderValidator->validate($inputOrderData)){
-    return ['ok'=>$orderValidator->getResponseStatus(), 'error'=>$orderValidator->getResponseValue()];
+if (!$orderValidator->validate($inputOrderData)) {
+    return ['ok' => $orderValidator->getResponseStatus(), 'error' => $orderValidator->getResponseValue()];
 }
 
 
@@ -41,15 +36,12 @@ $order = new OrderService();
 $createdOrder = $order->createOrder($inputOrderData, $promoCodes);
 
 
-
-
 $orderFile = new OrderFile();
 
 $savedOrder = $orderFile->saveOrder($createdOrder);
 
 
-if($savedOrder['status'] == 'ok')
-{
+if ($savedOrder['status'] == 'ok') {
     $notifier = new Notifier($createdOrder['customer']['email'], $order->getAdminEmail(), true);
 
 
@@ -59,9 +51,7 @@ if($savedOrder['status'] == 'ok')
 
     $notifier->notifyAdmin($adminMessage);
     $notifier->notifyCustomer($customerMessage);
-}
-else
-{
+} else {
     var_dump($savedOrder['message']);
 }
 

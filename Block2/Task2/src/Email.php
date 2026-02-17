@@ -14,7 +14,7 @@ class Email
     public function __construct(string $email)
     {
         if (trim($email) === '' || !str_contains($email, '@')) {
-            throw new BadMethodCallException('Email not valid');
+                throw new \Exception('Email not valid');
         }
         $this->email = $email;
     }

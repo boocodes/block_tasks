@@ -26,7 +26,7 @@ class OrderService
             $orderEntity = new OrderEntity($orderId, $orderPrice, $orderRequest->items);
             var_dump($orderEntity->getOrder());
             return $orderEntity;
-        } catch (\BadMethodCallException $e) {
+        } catch (\Exception $e) {
             echo $e->getMessage();
             return false;
         }

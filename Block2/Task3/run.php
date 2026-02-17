@@ -1,16 +1,12 @@
 <?php
-
-
-require_once './Services.php';
-require_once './OrderContainer.php';
-require_once './OrderInterfaces.php';
-require_once './ReportGenerator.php';
+namespace Task3;
+require  'vendor/autoload.php';
 
 
 $container = new OrderContainer();
 
-try {
 
+try {
     $container->singleton(OrderRepositoryInterface::class, function () {
         return new OrderRepositoryService();
     });
@@ -42,6 +38,6 @@ try {
     $report = $reportGenerator->createReport();
 
     echo $report;
-} catch (BadMethodCallException $e) {
+} catch (\Exception $e) {
     echo $e->getMessage();
 }

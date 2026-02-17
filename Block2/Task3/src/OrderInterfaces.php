@@ -1,6 +1,11 @@
 <?php
 
 
+namespace Task3;
+
+
+use DateTimeImmutable;
+
 interface LoggerInterface
 {
     public function logMessage(string $message): void;

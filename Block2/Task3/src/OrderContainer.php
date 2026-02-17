@@ -1,5 +1,6 @@
 <?php
 
+namespace Task3;
 class OrderContainer
 {
     private array $singletones;
@@ -9,16 +10,16 @@ class OrderContainer
     {
         $this->factories[$id] = $factory;
     }
+
     public function has(string $id): bool
     {
         return isset($this->factories[$id]) || isset($this->singletones[$id]);
     }
+
     public function singleton(string $id, callable $factory): void
     {
-        $this->factories[$id] = function() use ($id, $factory)
-        {
-            if(!isset($this->singletones[$id]))
-            {
+        $this->factories[$id] = function () use ($id, $factory) {
+            if (!isset($this->singletones[$id])) {
                 $this->singletones[$id] = $factory($this);
             }
             return $this->singletones[$id];
@@ -27,18 +28,14 @@ class OrderContainer
 
     public function get(string $id)
     {
-        if(isset($this->factories[$id]))
-        {
+        if (isset($this->factories[$id])) {
             return $this->factories[$id]($this);
         }
         try {
-            if(class_exists($id))
-            {
+            if (class_exists($id)) {
                 return $this->prepareObject($id);
             }
-        }
-        catch (ReflectionException $e)
-        {
+        } catch (ReflectionException $e) {
             echo $e->getMessage();
         }
         throw new BadMethodCallException($id . ' does not exist.' . '\n');
@@ -50,28 +47,23 @@ class OrderContainer
     private function prepareObject(string $class)
     {
         $classReflector = new \ReflectionClass($class);
-        if($classReflector->isInterface() || $classReflector->isAbstract())
-        {
+        if ($classReflector->isInterface() || $classReflector->isAbstract()) {
             throw new ReflectionException('Cannot create an interface or abstract class ' . $class . '.');
         }
         $constructorReflector = $classReflector->getConstructor();
-        if(!$constructorReflector)
-        {
+        if (!$constructorReflector) {
             return new $class();
         }
         $constructorArgs = $constructorReflector->getParameters();
-        if(empty($constructorArgs))
-        {
+        if (empty($constructorArgs)) {
             return new $class();
         }
         $args = [];
-        foreach($constructorArgs as $arg)
-        {
+        foreach ($constructorArgs as $arg) {
             $argType = $arg->getType();
-            if($argType)
-            {
-               $argTypeName = $argType->getName();
-               $args[] = $this->get($argTypeName);
+            if ($argType) {
+                $argTypeName = $argType->getName();
+                $args[] = $this->get($argTypeName);
             }
         }
         unset($arg);
