@@ -6,8 +6,9 @@ class OrderEntity
 {
     private array $order;
 
-    public function __construct(OrderId $orderId, Price $orderPrice, array $items)
+    public function __construct(OrderId $orderId, Price $orderPrice, Email $email, array $items)
     {
+        $this->order['customer']['email'] = $email->getEmail();
         $this->order['id'] = $orderId->getId();
         $this->order['pricing']['total'] = $orderPrice->getAmount();
         $this->order['pricing']['currency'] = $orderPrice->getCurrency();

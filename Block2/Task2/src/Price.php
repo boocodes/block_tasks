@@ -19,11 +19,6 @@ class Price
         $this->currency = $currency;
     }
 
-    public function setAmount(float $amount): void
-    {
-        $this->amount = $amount;
-    }
-
     public function getAmount(): float
     {
         return $this->amount;

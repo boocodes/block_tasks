@@ -4,7 +4,7 @@ require_once 'vendor/autoload.php';
 
 
 $data = [
-    'customer' => ['email' => '', 'name' => 'test'],
+    'customer' => ['email' => 'test@mail.ru', 'name' => 'test'],
     'items' => [
         ['sku' => 'A1', 'title' => 'Carrot', 'price' => 200.00, 'qty' => 1],
         ['sku' => 'A1', 'title' => 'Potato', 'price' => 200.00, 'qty' => 1],
@@ -20,14 +20,11 @@ $orderService = new OrderService(new \Task2\Validator());
 
 $orderRequest = new OrderRequest($data);
 
-
 try {
-    $orderService->createOrder(
-        $orderRequest,
-        new \Task2\Email($data['customer']['email']),
-        new \Task2\Price(0, $data['payment']['currency']),
-        new \Task2\OrderId()
+    $res = $orderService->createOrder(
+        $orderRequest
     );
+    var_dump($res);
 }
 catch (\Exception $e) {
     echo $e->getMessage();

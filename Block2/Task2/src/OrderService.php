@@ -13,18 +13,23 @@ class OrderService
         $this->validator = $validator;
     }
 
-    public function createOrder(OrderRequest $orderRequest, Email $orderEmail, Price $orderPrice, OrderId $orderId): OrderEntity|bool
+    public function createOrder(OrderRequest $orderRequest): OrderEntity|bool
     {
+        $orderTotal = 0;
         if (!$this->validator->validate($orderRequest)) return false;
         try {
             foreach ($orderRequest->items as $item) {
                 $item['price'] = isset($item['price']) ? (float)$item['price'] : 0.0;
-                $orderPrice->setAmount($orderPrice->getAmount() + $item['price']);
+                $orderTotal += $item['price'] * $item['qty'];
             }
             unset($item);
 
-            $orderEntity = new OrderEntity($orderId, $orderPrice, $orderRequest->items);
-            var_dump($orderEntity->getOrder());
+            $orderEntity = new OrderEntity(
+                new OrderId(),
+                new Price($orderTotal, $orderRequest->payment['currency']),
+                new Email($orderRequest->customer['email']),
+                $orderRequest->items
+            );
             return $orderEntity;
         } catch (\Exception $e) {
             echo $e->getMessage();
