@@ -12,7 +12,7 @@ class ReportGenerator
     )
     {}
 
-    public function createReport(): string
+    public function createReport(): float
     {
         $this->logger->logMessage("Report: \n");
         $ordersData = $this->orderRepository->getOrder();

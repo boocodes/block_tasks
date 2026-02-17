@@ -1,14 +1,16 @@
 <?php
 
-namespace Legacy;
+namespace Task1;
+
 
 use DateTimeImmutable;
+use Task1\OrderValidatorInterface;
 
 class OrderService
 {
     private string|array $responseValue;
     private bool $responseStatus = false;
-    private float $tax = 0.05;
+    private float $tax = 0.00;
     private array $order = [];
     private string $storageFile;
     private bool $debug;
@@ -20,6 +22,11 @@ class OrderService
         $this->storageFile = __DIR__ . '/../../var/orders.json';
         $this->adminEmail = 'admin@example.com';
         $this->debug = true;
+    }
+
+    public function getAdminEmail(): string
+    {
+        return $this->adminEmail;
     }
 
     /**
@@ -37,18 +44,14 @@ class OrderService
      *   'promoCode' => 'WELCOME10|VIP|FREESHIP' (опц.),
      * ]
      */
-    public function createOrder(array $input): array
+    public function createOrder(array $input, PromoCodeInterface $promoCode): array
     {
-        $validator = new OrderValidator();
-        if(!$validator->validate($input)) {
-            return ['ok'=>$validator->getResponseStatus(), 'error'=>$this->responseValue];
-        }
         $this->pricingCalculate($input);
-        $this->discountCalculate($input);
+        $this->taxCalculate($input);
         $this->paymentCalculate($input);
-        $this->ensureStorageDir();
-        $this->savingOrder();
-        var_dump($this->order);
+        $promoCode->parsePromoCode($input['promoCode']);
+
+        $promoCode->applyPromoCode($this->order);
         return $this->order;
     }
 
@@ -90,14 +93,13 @@ class OrderService
         unset($it);
         $this->order['items'] = $items;
 
-
+        $this->order['pricing']['subtotal'] = $subtotal;
         $delivery = $input['delivery'] ?? [];
         $deliveryType = isset($delivery['type']) ? (string)$delivery['type'] : 'courier';
 
         $deliveryCost = 0;
-
         if ($deliveryType === 'courier') {
-            $deliveryCost = ($subtotal >= 1000) ? 0 : 199;
+            $deliveryCost = ($this->order['pricing']['subtotal'] >= 1000) ? 0 : 199;
             if (empty($delivery['address'])) {
                 if ($this->debug) {
                     error_log("[DEBUG] courier without address for order {$this->order['id']}");
@@ -111,40 +113,26 @@ class OrderService
             $deliveryType = 'courier';
             $deliveryCost = 199;
         }
-
         $this->order['delivery'] = [
             'type' => $deliveryType,
             'cost' => $deliveryCost,
             'address' => (string)($delivery['address'] ?? ''),
         ];
-        $this->order['pricing']['subtotal'] = $subtotal;
+
     }
 
-    private function discountCalculate(&$input): void
+    private function taxCalculate(&$input): void
     {
         $discount = 0;
         $subtotal = $this->order['pricing']['subtotal'];
-        $promoCode = isset($input['promoCode']) ? strtoupper(trim((string)$input['promoCode'])) : '';
-        if ($promoCode !== '') {
-            if ($promoCode === 'WELCOME10') {
-                $discount = $subtotal * 0.10;
-            } elseif ($promoCode === 'VIP') {
-                if ($subtotal >= 2000) {
-                    $discount = 300;
-                } else {
-                    $discount = 100;
-                }
-            } elseif ($promoCode === 'FREESHIP') {
-                $deliveryCost = 0;
-            }
-        }
-        $tax = ($subtotal - $discount) * $this->tax;
-        $total = ($subtotal - $discount) + $this->tax + $this->order['delivery']['cost'];
+        $taxAmount = ($subtotal - $discount) * $this->tax;
+        $total = (($subtotal - $discount) - $taxAmount) + $this->order['delivery']['cost'];
         if ($total < 0) $total = 0;
         $this->order['pricing']['total'] = $total;
         $this->order['pricing']['discount'] = $discount;
-        $this->order['pricing']['tax'] = $tax;
-        $this->order['pricing']['promoCode'] = $promoCode;
+        $this->order['pricing']['tax'] = $this->tax;
+        $this->order['pricing']['promoCode'] = $input['promoCode'] ?? '';
+
     }
 
     private function paymentCalculate(&$input): void
@@ -167,40 +155,6 @@ class OrderService
             'method' => $paymentMethod,
             'status' => $paymentStatus,
         ];
-    }
 
-
-    private function savingOrder(): void
-    {
-        $existing = [];
-        $now = new DateTimeImmutable();
-        $this->order['createdAt'] = $now->format('c');
-        if (file_exists($this->storageFile)) {
-            $raw = file_get_contents($this->storageFile);
-            $existing = json_decode($raw, true);
-            if (!is_array($existing)) {
-                $existing = [];
-            }
-        }
-        $existing[] = $this->order;
-        file_put_contents($this->storageFile, json_encode($existing, JSON_PRETTY_PRINT));
-        $this->responseStatus = true;
-        $this->responseValue = $this->order;
-        $notifier = new Notifier($this->order['customer']['email'], $this->adminEmail, true);
-        $customerMessage = 'Thanks! Your order ' . $this->order['id'] . ' total=' . $this->order['pricing']['total'] . PHP_EOL;
-        $adminMessage = 'New order ' . $this->order['id'] . ' total=' . $this->order['pricing']['total'] . ' customer=' . $this->order['customer']['email'] . PHP_EOL;
-        $notifier->notifyCustomer($customerMessage);
-        $notifier->notifyAdmin($adminMessage);
-
-    }
-
-
-
-    private function ensureStorageDir(): void
-    {
-        $dir = dirname($this->storageFile);
-        if (!is_dir($dir)) {
-            mkdir($dir, 0777, true);
-        }
     }
 }
