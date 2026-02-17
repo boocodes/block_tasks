@@ -1,5 +1,9 @@
 <?php
 
+namespace Task2;
+
+
+
 class OrderRequest
 {
     public readonly array $customer;
@@ -7,6 +11,7 @@ class OrderRequest
     public readonly array $payment;
     public readonly array $delivery;
     public readonly string $promoCode;
+
     /*
      * @param array $input Ожидается структура:
      * [

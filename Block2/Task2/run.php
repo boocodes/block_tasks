@@ -1,7 +1,10 @@
 <?php
 
-require_once './OrderRequest.php';
-require_once './OrderService.php';
+use Task2\OrderRequest;
+use Task2\OrderService;
+use Task2\Validator;
+
+require_once 'vendor/autoload.php';
 
 
 $data = [
@@ -16,7 +19,14 @@ $data = [
     'delivery' => ['type' => 'pickup', 'address' => ''],
     'promoCode' => '',
 ];
-$orderService = new OrderService();
+
+$orderService = new OrderService(new \Task2\Validator());
+
 $orderRequest = new OrderRequest($data);
 
-$orderService->createOrder($orderRequest);
+$orderService->createOrder(
+    $orderRequest,
+    new \Task2\Email($data['customer']['email']),
+    new \Task2\Price(0, $data['payment']['currency']),
+    new \Task2\OrderId()
+);
