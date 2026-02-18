@@ -4,23 +4,18 @@ namespace Task5\Application\DTO;
 
 use Task5\Domain\Enums\StatusEnum;
 
-class Task
+class Task extends Model
 {
-    public int $id;
-    public string $title;
-    public ?string $description;
-    public StatusEnum $status = StatusEnum::New;
-    public string $createdAt;
+    protected int $id;
+    protected string $title;
+    protected ?string $description;
+    protected StatusEnum $status = StatusEnum::New;
+    protected string $createdAt;
+    protected string $tableName = 'Tasks';
+    protected array $required = ['id', 'title', 'description'];
 
-    public function __construct(string $title,
-                                string $description,
-                                StatusEnum $status,
-    )
+    private function __construct()
     {
-        $this->id = (int)(microtime(true) * 1000) . rand(100, 10000);
-        $this->title = $title;
-        $this->description = $description;
-        $this->status = $status;
-        $this->createdAt = new \DateTimeImmutable()->format('c');
     }
+
 }

@@ -27,12 +27,12 @@ class PromoCodeContainer implements PromoCodeInterface
         if (empty($promoCodesArray)) return;
 
         foreach ($promoCodesArray as $promoCode) {
-            if ($promoCode === 'WELCOME10') {
+            if (strtoupper($promoCode) === 'WELCOME10') {
                 $this->promoCodes['WELCOME10'] = function (&$order) {
                     $order['pricing']['discount'] = $order['pricing']['total'] * 0.1;
                     $order['pricing']['total'] = $order['pricing']['total'] - $order['pricing']['discount'];
                 };
-            } else if ($promoCode === 'VIP') {
+            } else if (strtoupper($promoCode) === 'VIP') {
                 $this->promoCodes['VIP'] = function (&$order) {
                     if ($order['pricing']['subtotal'] >= 2000) {
                         $order['pricing']['discount'] = 300;
@@ -45,7 +45,7 @@ class PromoCodeContainer implements PromoCodeInterface
                         $order['pricing']['total'] = $order['pricing']['subtotal'] - $order['pricing']['discount'];
                     }
                 };
-            } else if ($promoCode === 'SHIPFREE') {
+            } else if (strtoupper($promoCode) === 'SHIPFREE') {
                 $this->promoCodes['SHIPFREE'] = function (&$order) {
                     $order['pricing']['total'] = $order['pricing']['total'] - $order['pricing']['deliveryCost'];
                     $order['pricing']['deliveryCost'] = 0;

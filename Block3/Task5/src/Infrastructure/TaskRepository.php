@@ -2,10 +2,12 @@
 
 namespace Task5\Infrastructure;
 
-use Task2\Application\DTO\Task;
-use Task2\Core\Sender;
-use Task2\Domain\Interfaces\TaskRepositoryInterface;
-use Task2\Core\App;
+use Task5\Application\DTO\Task;
+use Task5\Core\Sender;
+use Task5\Domain\Interfaces\TaskRepositoryInterface;
+use Task5\Core\App;
+use Task5\AddTask;
+use Task5\GetTaskById;
 
 class TaskRepository implements TaskRepositoryInterface
 {
@@ -23,39 +25,6 @@ class TaskRepository implements TaskRepositoryInterface
         return $this->jsonStoragePath;
     }
 
-    private function authBearerToken(): bool
-    {
-        if (!isset($_SERVER['HTTP_AUTHORIZATION']) && !isset($_SERVER['Authorization'])) {
-            header('WWW-Authenticate: Bearer');
-            Sender::SendJsonResponse([
-                ['status' => 'error',
-                    'message' => 'Authorization header required']
-            ], 401);
-            return false;
-        }
-        else
-        {
-            $headerAuth = $_SERVER['HTTP_AUTHORIZATION'] ?? $_SERVER['Authorization'];
-            $bearerToken = "";
-            if(preg_match('/Bearer\s(\S+)/', $headerAuth, $matches))
-            {
-                $bearerToken = $matches[1];
-            }
-            if($bearerToken !== App::getBearerToken())
-            {
-                Sender::SendJsonResponse([
-                    ['status' => 'error',
-                        'message' => 'Authorization wrong']
-                ], 403);
-                return false;
-            }
-            else
-            {
-                return true;
-            }
-        }
-    }
-
     public function setJsonStoragePath(string $jsonStoragePath): void
     {
         $this->jsonStoragePath = $jsonStoragePath;
@@ -63,20 +32,12 @@ class TaskRepository implements TaskRepositoryInterface
 
     public function getTaskById(int $id): Task|array
     {
-        $data = file_get_contents($this->getJsonStoragePath());
-        $data = json_decode($data, true);
-        foreach ($data as $task) {
-            if ($task['id'] == $id) {
-                return $task;
-            }
-        }
-        unset($task);
-        return [];
+       return new GetTaskById()->run($id, $this->jsonStoragePath);
     }
 
     public function addTask(Task $task, string $idempotencyKey): array
     {
-        if(!$this->authBearerToken()) return [];
+        return new AddTask()->run($task, $this->jsonStoragePath);
         $idempotencyKeysList = json_decode(file_get_contents($this->idempotencyKeyStoragePath), true);
         if ($idempotencyKeysList && strlen($idempotencyKey) > 0) {
 
