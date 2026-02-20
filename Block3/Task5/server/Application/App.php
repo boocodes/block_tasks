@@ -15,6 +15,7 @@ class App
     private array $patchRoutesArray = [];
     private array $deleteRoutesArray = [];
     private array $optionsRoutesArray = [];
+    private $notFoundPageController;
 
     public function __construct(Request $request)
     {
@@ -24,6 +25,10 @@ class App
     public function addGetRoute(string $url, callable $callback, array $middleware = []): void
     {
         $this->getRoutesArray[] = new Route($url, $callback, $middleware, $this->request);
+    }
+    public function setNotFoundPageController(callable $callback): void
+    {
+        $this->notFoundPageController = $callback;
     }
     public function addOptionRoute(string $url, callable $callback, array $middleware = []): void
     {
@@ -89,7 +94,7 @@ class App
                 }
             }
         }
-
+        call_user_func_array($this->notFoundPageController, [$this->request]);
     }
 
 }
