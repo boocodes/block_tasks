@@ -8,10 +8,12 @@ use Task7\Infrastructure\WebHook\WebHookWorker;
 abstract class Model
 {
     private WebHookWorker $webhookWorker;
+
     public function __construct()
     {
         $this->webhookWorker = new WebHookWorker();
     }
+
     private function checkRequiredData(array $data): bool
     {
         $requiredFields = get_class_vars(get_class($this))['required'] ?? [];
@@ -101,7 +103,7 @@ abstract class Model
         if ($idempotencyKeysList === null || strlen(trim($idempotencyKey ?? '')) === 0) {
             $previousData[] = $result;
             var_dump('create new. Key do not set or key list do not exist');
-            if(strlen(trim($idempotencyKey ?? '')) > 0) {
+            if (strlen(trim($idempotencyKey ?? '')) > 0) {
                 $idempotencyKeysList[] = [
                     'idempotencyKey' => $idempotencyKey,
                     'id' => $result['id'],
@@ -154,10 +156,8 @@ abstract class Model
                 $idValue = $row['id'];
                 $row = $result;
                 $row['id'] = $idValue;
-                if(isset($row['status']))
-                {
-                    if($row['status'] === TaskStatus::Done->value)
-                    {
+                if (isset($row['status'])) {
+                    if ($row['status'] === TaskStatus::Done->value) {
                         $this->webhookWorker->work(
                             $row['id'],
                             $row['status'],
