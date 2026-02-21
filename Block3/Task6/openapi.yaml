@@ -1,0 +1,280 @@
+openapi: 3.0.3
+info:
+  title: API
+  version: 0.1.0
+servers:
+  url: http://localhost:5173
+
+components:
+  headers:
+    Idempotency-key:
+      name: 'Idempotency-key'
+      in: header
+      required: false
+      description: 'Unique key allowed pass creating equal tasks'
+      schema:
+        type: string
+        format: uuid
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme:
+        bearer
+      bearerFormat: JWT
+  schemas:
+    UnauthorizedError:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 401
+        message:
+          type: string
+          example: 'Unauthorized'
+    Error:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 400
+        message:
+          type: string
+          example: 'Validation error'
+        errors:
+          type: object
+          additionalProperties:
+            type: string
+            example:
+              {
+                "title": 'Title can not be empty',
+                "status": 'Status must be one of these: in_progress, done, new'
+              }
+    TaskListResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          description: 'Tasks list'
+          items:
+            $ref: '#/components/schemas/Task';
+        nextCursor:
+          type: string
+          nullable: true
+          description: 'Cursor for next page'
+          example: 'few9f2933121-q'
+      required:
+        - items
+    Task:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: 'Unique identification'
+          example: '122343fwfwe9323d-dwqdq'
+        title:
+          type: string
+          description: 'Task title field'
+          example: 'Main text to do'
+        description:
+          type: string
+          description: 'Task description field'
+          example: 'About text'
+        status:
+          type: string
+          description: 'Current task status: new | in_progress | done'
+          example: 'new'
+        created_at:
+          type: string
+          format: date-time
+          description: 'Date of creating task'
+          example: "2000-01-11"
+      required:
+        - title
+        - status
+  responses:
+    Unauthorize:
+      description: 'Unauthorized'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UnauthorizedError'
+    TaskResponse:
+      description: 'Success'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Task'
+    TaskListResponse:
+      description: 'Success'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/TaskListResponse'
+    BadRequest:
+      description: 'Error request'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NotFound:
+      description: 'Not found'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    ValidationError:
+      description: 'Error validation'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+  parameters:
+    StatusQuery:
+      name: status
+      in: query
+      required: false
+      description: "Status of current task"
+      schema:
+        type: string
+        enum:
+          - in_progress
+          - done
+          - new
+      example: "in_progress"
+    LimitQuery:
+      name: limit
+      in: query
+      required: false
+      description: "Define max count of display tasks"
+      schema:
+        type: string
+        minimum: 1
+        maximum: 100
+      example: 10
+    CursorQuery:
+      name: cursor
+      in: query
+      required: false
+      description: "Cursor for pagination tasks list"
+      schema:
+        type: string
+        format: uuid
+      example: "4392e92d-dqwdd21"
+    TaskId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+tags:
+  - name: 'Task'
+security:
+  - BearerAuth: []
+paths:
+  /tasks:
+    post:
+      tags:
+        - Task
+      security:
+        - BearerAuth: []
+      summary: Создание задачи
+      description: 'Create a new task by input data'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Task'
+      responses:
+        '401':
+          $ref: '#/components/responses/Unauthorize'
+        '201':
+          description: 'Successfully created'
+          headers:
+            Location:
+              description: 'URL'
+              schema:
+                type: string
+                format: uri
+              example: '/tasks'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        '409':
+          $ref: '#/components/schemas/Error'
+    get:
+      summary: 'Get tasks list'
+      description: 'Return tasks list array'
+      tags:
+        - Task
+      security:
+        - BearerAuth: [ ]
+      parameters:
+        - $ref: '#/components/parameters/StatusQuery'
+        - $ref: '#/components/parameters/LimitQuery'
+        - $ref: '#/components/parameters/CursorQuery'
+      responses:
+        '200':
+          $ref: '#/components/schemas/TaskListResponse'
+        '400':
+          $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/Unauthorize'
+  /tasks/{id}:
+    get:
+      summary: 'Get task by id'
+      description: 'Get current task by finding id'
+      tags:
+        - Task
+      security:
+        - BearerAuth: [ ]
+      parameters:
+        - $ref: '#/components/parameters/TaskId'
+      responses:
+        '200':
+          $ref: '#/components/schemas/Task'
+        '404':
+          $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/Unauthorize'
+    patch:
+      summary: 'Edit task'
+      description: 'Edit task'
+      tags:
+        - Task
+      security:
+        - BearerAuth: [ ]
+      parameters:
+        - $ref: '#/components/parameters/TaskId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Task'
+      responses:
+        '200':
+          $ref: '#/components/schemas/Task'
+        '422':
+          $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/Unauthorize'
+    delete:
+      summary: 'Delete current task'
+      description: 'Delete current task by id'
+      tags:
+        - Task
+      parameters:
+        - $ref: '#/components/parameters/TaskId'
+      responses:
+        '204':
+          $ref: '#/components/schemas/Task'
+        '404':
+          $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/Unauthorize'
+
+
