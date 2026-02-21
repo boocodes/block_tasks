@@ -22,7 +22,7 @@ $appInstance->addPostRoute('/webhook-receiver', function (Request $request) {
         'headers' => $request->getHeaders(),
     ];
     file_put_contents($logFile, json_encode($logEntry, JSON_PRETTY_PRINT) . PHP_EOL, FILE_APPEND);
-    http_response_code(400);
+    http_response_code(404);
     echo json_encode(['status' => 'received']);
 });
 
