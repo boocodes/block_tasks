@@ -5,7 +5,7 @@ namespace API;
 
 class Sender
 {
-    public static function SendJsonResponse(array $data, $statusCode): void
+    public static function SendJsonResponse(array $data, int $statusCode): void
     {
         header('Content-Type: application/json');
         http_response_code($statusCode);
