@@ -14,7 +14,7 @@ $appInstance = new App(new Request());
 $appInstance->addGetRoute('/tasks/{id}', function (Request $request, $id) {
     $result = new \Task5\Application\Model\Task()->getById($id);
     var_dump($result);
-}, [new BearerToken()]);
+});
 
 //curl.exe -X GET -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c" -H "Content-Type: application/json" http://127.0.0.1:8000/tasks?limit=2
 $appInstance->addGetRoute('/tasks', function (Request $request) {
@@ -75,7 +75,7 @@ $appInstance->addGetRoute('/tasks', function (Request $request) {
 //>> "@ http://127.0.0.1:8000/tasks
 $appInstance->addPostRoute('/tasks', function (Request $request) {
     $result = new \Task5\Application\Model\Task()->add($request->getBody(), '');
-});
+}, [new BearerToken()]);
 //curl.exe -X PATCH -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c" -H "Content-Type: application/json" -d @"
 //>> {
 //>>     \"title\": \"text\",
@@ -84,9 +84,9 @@ $appInstance->addPostRoute('/tasks', function (Request $request) {
 //>> "@ http://127.0.0.1:8000/tasks/6998726dbbe73
 $appInstance->addPatchRoute('/tasks/{id}', function (Request $request, $id) {
     $result = new \Task5\Application\Model\Task()->editById($id, $request->getBody());
-});
+}, [new BearerToken()]);
 //curl.exe -X DELETE -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c" -H "Content-Type: application/json" http://127.0.0.1:8000/tasks/10
 $appInstance->addDeleteRoute('/tasks/{id}', function (Request $request, $id) {
     $result = new \Task5\Application\Model\Task()->deleteById($id);
-});
+}, [new BearerToken()]);
 $appInstance->run();

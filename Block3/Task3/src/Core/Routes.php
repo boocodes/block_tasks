@@ -1,6 +1,6 @@
 <?php
 
-namespace Task2\Core;
+namespace Task3\Core;
 
 
 class Routes

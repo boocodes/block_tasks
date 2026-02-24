@@ -1,8 +1,8 @@
 <?php
 
-namespace Task2\Application\DTO;
+namespace Task3\Application\DTO;
 
-use Task2\Domain\Enums\StatusEnum;
+use Task3\Domain\Enums\StatusEnum;
 
 class Task
 {

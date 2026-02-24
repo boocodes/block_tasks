@@ -1,25 +1,96 @@
 <?php
 
-namespace Task2\Infrastructure;
+namespace Task3\Infrastructure;
 
-use API\Sender;
-use Task2\Application\DTO\Task;
-use Task2\Domain\Interfaces\TaskRepositoryInterface;
+use Task3\Application\DTO\Task;
+use Task3\Domain\Enums\StatusEnum;
+use Task3\Domain\Interfaces\TaskRepositoryInterface;
 
 class TaskRepository implements TaskRepositoryInterface
 {
     private string $jsonStoragePath;
-    private string $idempotencyKeyStoragePath;
-
+    private string $idempotencyKeysPath;
     public function __construct()
     {
         $this->jsonStoragePath = dirname(__DIR__, 1) . '\database.json';
-        $this->idempotencyKeyStoragePath = dirname(__DIR__, 1) . '\idempotencyKey.json';
+        $this->idempotencyKeysPath = dirname(__DIR__, 1) . '\idempotencyKeys.json';
+    }
+
+    private function checkTaskEquals(Task $taskOne, Task $taskTwo): bool
+    {
+        return (
+            $taskOne->title === $taskTwo->title &&
+            $taskOne->description === $taskTwo->description &&
+            $taskOne->createdAt === $taskTwo->createdAt &&
+            $taskOne->status === $taskTwo->status
+        );
     }
 
     public function getJsonStoragePath(): string
     {
         return $this->jsonStoragePath;
+    }
+    public function addTaskWithIdempotencyKey(Task $task): bool
+    {
+        if(!isset($_SERVER['HTTP_IDEMPOTENCY_KEY'])) {
+            $this->addTask($task);
+            return true;
+        }
+
+        $currentIdempotencyKey = $_SERVER['HTTP_IDEMPOTENCY_KEY'];
+        $previousIdempotencyKeys = file_get_contents($this->idempotencyKeysPath);
+        if(!$previousIdempotencyKeys)
+        {
+            $newIdempotencyValue = [
+                'task_id' => $task->id,
+                'idempotency_key' => $currentIdempotencyKey,
+            ];
+            file_put_contents($this->idempotencyKeysPath, json_encode([$newIdempotencyValue], JSON_PRETTY_PRINT));
+            $this->addTask($task);
+            return true;
+        }
+        $previousIdempotencyKeys = json_decode($previousIdempotencyKeys, true);
+        foreach ($previousIdempotencyKeys as $key => $value)
+        {
+            if($value['idempotency_key'] === $currentIdempotencyKey)
+            {
+                // search task
+                $searchingTask = $this->getTaskById($value['task_id']);
+                if(empty($searchingTask))
+                {
+                    $newTask = $this->addTask($task);
+                    // delete idempotency key
+                    $previousIdempotencyKeys[$key]['task_id'] = $newTask->id;
+                    file_put_contents($this->idempotencyKeysPath, json_encode($previousIdempotencyKeys, JSON_PRETTY_PRINT));
+                    return true;
+                }
+                else
+                {
+                    if(
+                        $searchingTask['title'] === $task->title &&
+                        $searchingTask['description'] === $task->description &&
+                        $searchingTask['status'] === $task->status->value
+                    )
+                    {
+                        return true;
+                    }
+                    else
+                    {
+                        return false;
+                    }
+
+                }
+            }
+        }
+        // nothing found
+        $newIdempotencyValue = [
+            'task_id' => $task->id,
+            'idempotency_key' => $currentIdempotencyKey,
+        ];
+        $previousIdempotencyKeys[] = $newIdempotencyValue;
+        file_put_contents($this->idempotencyKeysPath, json_encode($previousIdempotencyKeys, JSON_PRETTY_PRINT));
+        $this->addTask($task);
+        return true;
     }
 
     public function setJsonStoragePath(string $jsonStoragePath): void
@@ -31,8 +102,9 @@ class TaskRepository implements TaskRepositoryInterface
     {
         $data = file_get_contents($this->getJsonStoragePath());
         $data = json_decode($data, true);
+        if($data === null) return [];
         foreach ($data as $task) {
-            if ($task['id'] == $id) {
+            if ($task['id'] === $id) {
                 return $task;
             }
         }
@@ -40,22 +112,8 @@ class TaskRepository implements TaskRepositoryInterface
         return [];
     }
 
-    public function addTask(Task $task, string $idempotencyKey): array
+    public function addTask(Task $task): Task
     {
-        $idempotencyKeysList = json_decode(file_get_contents($this->idempotencyKeyStoragePath), true);
-        if($idempotencyKeysList && strlen($idempotencyKey) > 0)  {
-
-            foreach ($idempotencyKeysList as $idempotencyKeyElem => $value) {
-                if ($idempotencyKey == $value['key']) {
-                    if($task->id !== $value['id']) {
-                        Sender::SendJsonResponse([
-                            ['status' => 'error', 'message' => 'Idempotency key already exist. Task values different'],
-                        ], 409);
-                    }
-                    return $this->getTaskById($value['id']);
-                }
-            }
-        }
         $data = json_decode(file_get_contents($this->getJsonStoragePath()), true);
         $data[] = [
             'id' => $task->id,
@@ -65,18 +123,7 @@ class TaskRepository implements TaskRepositoryInterface
             'created_at' => $task->createdAt,
         ];
         file_put_contents($this->getJsonStoragePath(), json_encode($data, JSON_PRETTY_PRINT));
-        $idempotencyKeysList[] = [
-            'key' => $idempotencyKey,
-            'id' => $task->id,
-        ];
-        file_put_contents($this->idempotencyKeyStoragePath, json_encode($idempotencyKeysList, JSON_PRETTY_PRINT));
-        return [
-            'id' => $task->id,
-            'title' => $task->title,
-            'description' => $task->description,
-            'status' => $task->status->value,
-            'created_at' => $task->createdAt,
-        ];
+        return $task;
     }
 
     public function getTasks(): array
@@ -88,6 +135,7 @@ class TaskRepository implements TaskRepositoryInterface
     public function getTasksWithCursorPaginationRule(string|null $status, int $limit, string|null $cursor): array
     {
         $taskList = $this->getTasks();
+
 
         if ($status !== null) {
             $taskList = array_filter($taskList, function ($task) use ($status) {
@@ -130,14 +178,15 @@ class TaskRepository implements TaskRepositoryInterface
 
     }
 
-    public function updateTask(string $id, null|string $title = "", null|string $description = ""): bool
+    public function updateTask(string $id, null|string $title = "", null|string $description = "", null|StatusEnum $status = StatusEnum::New): bool
     {
         $data = json_decode(file_get_contents($this->getJsonStoragePath()), true);
         foreach ($data as &$task) {
             if ($task['id'] == $id) {
                 $task['title'] = $title ?? $task['title'];
                 $task['description'] = $description ?? $task['description'];
-                file_put_contents($this->getJsonStoragePath(), json_encode($data));
+                $task['status'] = $status === null ? $task['status'] : $status->value;
+                file_put_contents($this->getJsonStoragePath(), json_encode($data), JSON_PRETTY_PRINT);
                 return true;
             }
         }

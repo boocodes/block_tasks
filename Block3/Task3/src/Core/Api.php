@@ -1,35 +1,36 @@
 <?php
 
-namespace Task2\Core;
+namespace Task3\Core;
 
-
-use DateTime;
-use Task2\Core\Request;
-use Task2\Core\Routes;
-use Task2\Core\Sender;
-use Task2\Infrastructure\TaskRepository;
-use Task2\Application\DTO\Task;
-use Task2\Domain\Enums\StatusEnum;
+use Task3\Domain\Enums\StatusEnum;
+use Task3\Infrastructure\TaskRepository;
+use Task3\Application\DTO\Task;
 
 Routes::post('/tasks', function (Request $request) {
     $inputJson = json_decode($request->getInputData(), true);
-    $query = [];
-    parse_str(parse_url($_SERVER['REQUEST_URI'], PHP_URL_QUERY) ?? '', $query);
-    $idempotencykey = $query['idempotencykey'] ?? '';
     if ($inputJson['title'] !== '') {
         $task = new Task(
             $inputJson['title'],
             $inputJson['description'] ?? "",
-            StatusEnum::New,
+            isset($inputJson['status']) ? (StatusEnum::tryFrom($inputJson['status']) ?? StatusEnum::New) : StatusEnum::New
         );
         $taskRepository = new TaskRepository();
-        $taskResult = $taskRepository->addTask($task, $query['idempotencyKey'] ?? "");
+        $taskCreatingResult = $taskRepository->addTaskWithIdempotencyKey($task);
 
-        Sender::SendJsonResponse(['id' => $taskResult['id'],
-            'title' => $taskResult['title'],
-            'description' => $taskResult['description'],
-            'status' => $taskResult['status'],
-            'createdAt' => $taskResult['created_at']], 200);
+        if($taskCreatingResult)
+        {
+            Sender::SendJsonResponse(['id' => $task->id,
+                'title' => $task->title,
+                'description' => $task->description,
+                'status' => $task->status,
+                'createdAt' => $task->createdAt], 201);
+        }
+        else
+        {
+            Sender::SendJsonResponse([], 409);
+        }
+
+
     } else {
         Sender::SendJsonResponse(['status' => 'error', 'message' => 'Can not create an task. Title is required.'], 400);
     }
@@ -41,9 +42,9 @@ Routes::get('/tasks', function (Request $request) {
     $taskRepository = new TaskRepository();
     $query = [];
     parse_str(parse_url($_SERVER['REQUEST_URI'], PHP_URL_QUERY) ?? '', $query);
-    $status = $query['status'] ?? '';
+    $status = $query['status'] ?? null;
     $limit = isset($query['limit']) ? (int)$query['limit'] : 5;
-    $cursor = $query['cursor'] ?? '';
+    $cursor = $query['cursor'] ?? null;
     $getAllValue = isset($query['all']) && $query['all'] === 'true';
 
     if (!$getAllValue) {
@@ -53,7 +54,7 @@ Routes::get('/tasks', function (Request $request) {
         $result = $taskRepository->getTasksWithCursorPaginationRule($status, $limit, $cursor);
         Sender::SendJsonResponse([
             'data' => $result['data'] ?? [],
-            'nextCursor' => $result['cursor'] ?? null,
+            'nextCursor' => $result['next_cursor'] ?? null,
         ], 200);
     } else {
         $taskList = $taskRepository->getTasks();
@@ -73,7 +74,7 @@ Routes::get('/task/{$id}', function (Request $request, $id) {
         Sender::SendJsonResponse([
             'status' => 'error',
             'message' => 'Task with id ' . $id . ' not found.',
-        ], 400);
+        ], 404);
     } else {
         Sender::SendJsonResponse([
             ['data' => $task]
@@ -85,14 +86,9 @@ Routes::delete('/task/{$id}', function (Request $request, $id) {
     $taskRepository = new TaskRepository();
     $result = $taskRepository->deleteTask($id);
     if ($result) {
-        Sender::SendJsonResponse([
-            ['status' => 'ok'],
-        ], 204);
+        http_response_code(204);
     } else {
-        Sender::SendJsonResponse([
-            ['status' => 'error',
-                'message' => 'Task with id ' . $id . ' cannot be deleted.',],
-        ], 400);
+        http_response_code(400);
     }
 });
 
@@ -101,16 +97,17 @@ Routes::patch('/task/{$id}', function (Request $request, $id) {
     $inputJson = json_decode($request->getInputData(), true);
     $newTitle = $inputJson['title'] ?? null;
     $newDescription = $inputJson['description'] ?? null;
-    $result = $taskRepository->updateTask($id, $newTitle, $newDescription);
+    $newStatus =  isset($inputJson['status']) ? (StatusEnum::tryFrom($inputJson['status'])) : null;
+    $result = $taskRepository->updateTask($id, $newTitle, $newDescription, $newStatus);
     if ($result) {
         Sender::SendJsonResponse([
-            ['status' => 'ok',
-                'message' => 'Task with id ' . $id . ' has been updated.',],
+            'status' => 'ok',
+                'message' => 'Task with id ' . $id . ' has been updated.',
         ], 200);
     } else {
         Sender::SendJsonResponse([
-            ['status' => 'error',
-                'message' => 'Task with id ' . $id . ' cannot be updated.',],
+            'status' => 'error',
+                'message' => 'Task with id ' . $id . ' cannot be updated.',
         ], 422);
     }
 });
