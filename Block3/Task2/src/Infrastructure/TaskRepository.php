@@ -3,6 +3,7 @@
 namespace Task2\Infrastructure;
 
 use Task2\Application\DTO\Task;
+use Task2\Domain\Enums\StatusEnum;
 use Task2\Domain\Interfaces\TaskRepositoryInterface;
 
 class TaskRepository implements TaskRepositoryInterface
@@ -61,6 +62,7 @@ class TaskRepository implements TaskRepositoryInterface
     {
         $taskList = $this->getTasks();
 
+
         if ($status !== null) {
             $taskList = array_filter($taskList, function ($task) use ($status) {
                 return strtolower($task['status']) === strtolower($status);
@@ -102,14 +104,15 @@ class TaskRepository implements TaskRepositoryInterface
 
     }
 
-    public function updateTask(string $id, null|string $title = "", null|string $description = ""): bool
+    public function updateTask(string $id, null|string $title = "", null|string $description = "", null|StatusEnum $status = StatusEnum::New): bool
     {
         $data = json_decode(file_get_contents($this->getJsonStoragePath()), true);
         foreach ($data as &$task) {
             if ($task['id'] == $id) {
                 $task['title'] = $title ?? $task['title'];
                 $task['description'] = $description ?? $task['description'];
-                file_put_contents($this->getJsonStoragePath(), json_encode($data));
+                $task['status'] = $status === null ? $task['status'] : $status->value;
+                file_put_contents($this->getJsonStoragePath(), json_encode($data), JSON_PRETTY_PRINT);
                 return true;
             }
         }

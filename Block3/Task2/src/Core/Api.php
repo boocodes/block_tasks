@@ -33,9 +33,9 @@ Routes::get('/tasks', function (Request $request) {
     $taskRepository = new TaskRepository();
     $query = [];
     parse_str(parse_url($_SERVER['REQUEST_URI'], PHP_URL_QUERY) ?? '', $query);
-    $status = $query['status'] ?? '';
+    $status = $query['status'] ?? null;
     $limit = isset($query['limit']) ? (int)$query['limit'] : 5;
-    $cursor = $query['cursor'] ?? '';
+    $cursor = $query['cursor'] ?? null;
     $getAllValue = isset($query['all']) && $query['all'] === 'true';
 
     if (!$getAllValue) {
@@ -45,7 +45,7 @@ Routes::get('/tasks', function (Request $request) {
         $result = $taskRepository->getTasksWithCursorPaginationRule($status, $limit, $cursor);
         Sender::SendJsonResponse([
             'data' => $result['data'] ?? [],
-            'nextCursor' => $result['cursor'] ?? null,
+            'nextCursor' => $result['next_cursor'] ?? null,
         ], 200);
     } else {
         $taskList = $taskRepository->getTasks();
@@ -88,16 +88,17 @@ Routes::patch('/task/{$id}', function (Request $request, $id) {
     $inputJson = json_decode($request->getInputData(), true);
     $newTitle = $inputJson['title'] ?? null;
     $newDescription = $inputJson['description'] ?? null;
-    $result = $taskRepository->updateTask($id, $newTitle, $newDescription);
+    $newStatus =  isset($inputJson['status']) ? (StatusEnum::tryFrom($inputJson['status'])) : null;
+    $result = $taskRepository->updateTask($id, $newTitle, $newDescription, $newStatus);
     if ($result) {
         Sender::SendJsonResponse([
-            ['status' => 'ok',
-                'message' => 'Task with id ' . $id . ' has been updated.',],
+            'status' => 'ok',
+                'message' => 'Task with id ' . $id . ' has been updated.',
         ], 200);
     } else {
         Sender::SendJsonResponse([
-            ['status' => 'error',
-                'message' => 'Task with id ' . $id . ' cannot be updated.',],
+            'status' => 'error',
+                'message' => 'Task with id ' . $id . ' cannot be updated.',
         ], 422);
     }
 });
