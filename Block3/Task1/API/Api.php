@@ -25,7 +25,7 @@ Routes::post('/echo', function (Request $request) {
     }
     else
     {
-        Sender::SendJsonResponse([json_decode($request->getInputData())], 200);
+        Sender::SendJsonResponse(json_decode($request->getInputData(), true), 200);
     }
 });
 Routes::pageNotFound(function (Request $request) {

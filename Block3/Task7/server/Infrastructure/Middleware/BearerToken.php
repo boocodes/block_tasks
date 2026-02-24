@@ -33,7 +33,7 @@ class BearerToken implements Middleware
         if($bearerTokenInput !== $request->getConfig()['API_KEY']) {
             header('WWW-Authenticate: Bearer');
             http_response_code(403);
-            echo json_encode(['status' => 'error', 'message' => 'Authorization wrong']);
+            echo json_encode(['status' => 'error', 'message' => 'Authorization wrong. Current - ' . $bearerTokenInput . '. Input - ' . $request->getConfig()['API_KEY']]);
             return false;
         }
         return true;

@@ -91,7 +91,7 @@ $appInstance->addGetRoute('/tasks', function (Request $request) {
 //>> "@ http://127.0.0.1:8000/tasks
 $appInstance->addPostRoute('/tasks', function (Request $request) {
     $result = new Task()->add($request->getBody(), '');
-});
+}, [new BearerToken()]);
 //curl.exe -X PATCH -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c" -H "Content-Type: application/json" -d @"
 //>> {
 //>>     \"title\": \"text\",
