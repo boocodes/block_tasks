@@ -76,7 +76,7 @@ class TaskRepository implements TaskRepositoryInterface
 
     public function addTask(Task $task, string $idempotencyKey): array
     {
-        //if(!$this->authBearerToken()) return [];
+        if(!$this->authBearerToken()) return [];
         $idempotencyKeysList = json_decode(file_get_contents($this->idempotencyKeyStoragePath), true);
         if ($idempotencyKeysList && strlen($idempotencyKey) > 0) {
 
