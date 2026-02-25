@@ -6,6 +6,7 @@ use Task4\Application\DTO\Task;
 use Task4\Core\Sender;
 use Task4\Domain\Interfaces\TaskRepositoryInterface;
 use Task4\Core\App;
+use Task4\Infrastructure\middleware\Auth;
 
 class TaskRepository implements TaskRepositoryInterface
 {
@@ -21,39 +22,6 @@ class TaskRepository implements TaskRepositoryInterface
     public function getJsonStoragePath(): string
     {
         return $this->jsonStoragePath;
-    }
-
-    private function authBearerToken(): bool
-    {
-        if (!isset($_SERVER['HTTP_AUTHORIZATION']) && !isset($_SERVER['Authorization'])) {
-            header('WWW-Authenticate: Bearer');
-            Sender::SendJsonResponse([
-                ['status' => 'error',
-                    'message' => 'Authorization header required']
-            ], 401);
-            return false;
-        }
-        else
-        {
-            $headerAuth = $_SERVER['HTTP_AUTHORIZATION'] ?? $_SERVER['Authorization'];
-            $bearerToken = "";
-            if(preg_match('/Bearer\s(\S+)/', $headerAuth, $matches))
-            {
-                $bearerToken = $matches[1];
-            }
-            if($bearerToken !== App::getBearerToken())
-            {
-                Sender::SendJsonResponse([
-                    ['status' => 'error',
-                        'message' => 'Authorization wrong']
-                ], 403);
-                return false;
-            }
-            else
-            {
-                return true;
-            }
-        }
     }
 
     public function setJsonStoragePath(string $jsonStoragePath): void
@@ -76,7 +44,7 @@ class TaskRepository implements TaskRepositoryInterface
 
     public function addTask(Task $task, string $idempotencyKey): array
     {
-        if(!$this->authBearerToken()) return [];
+        if(!Auth::auth()) return [];
         $idempotencyKeysList = json_decode(file_get_contents($this->idempotencyKeyStoragePath), true);
         if ($idempotencyKeysList && strlen($idempotencyKey) > 0) {
 
@@ -162,7 +130,7 @@ class TaskRepository implements TaskRepositoryInterface
 
     public function updateTask(string $id, null|string $title = "", null|string $description = ""): bool
     {
-        if(!$this->authBearerToken()) return false;
+        if(!Auth::auth()) return false;
         $data = json_decode(file_get_contents($this->getJsonStoragePath()), true);
         foreach ($data as &$task) {
             if ($task['id'] == $id) {
@@ -178,7 +146,7 @@ class TaskRepository implements TaskRepositoryInterface
 
     public function deleteTask(string $id): bool
     {
-        if(!$this->authBearerToken()) return false;
+        if(!Auth::auth()) return false;
         $data = json_decode(file_get_contents($this->getJsonStoragePath()), true);
         $previousSize = count($data);
         foreach ($data as $task => $value) {
