@@ -23,4 +23,14 @@ class Task
         $this->status = $status;
         $this->createdAt = new \DateTimeImmutable()->format('c');
     }
+    public function toArray(): array
+    {
+        return [
+            'id' => $this->id,
+            'title' => $this->title,
+            'description' => $this->description,
+            'status' => $this->status->value,
+            'created_at' => $this->createdAt,
+        ];
+    }
 }

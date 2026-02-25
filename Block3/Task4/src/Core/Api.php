@@ -22,7 +22,7 @@ Routes::post('/tasks', function (Request $request) {
             StatusEnum::New,
         );
         $taskRepository = new TaskRepository();
-        $taskResult = $taskRepository->addTask($task, $query['idempotencyKey'] ?? "");
+        $taskResult = $taskRepository->addTask($task);
         if(empty($taskResult)) {
             return;
         }
