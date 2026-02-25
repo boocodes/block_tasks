@@ -32,6 +32,10 @@ $appInstance->addGetRoute('/tasks', function (Request $request) {
     $result = new \Task5\Application\Model\Task()->getAll();
 
     $status = $request->getQuery()['status'] ?? null;
+
+    $status = TaskStatus::tryFrom($status) ?? null;
+
+
     $cursor = $request->getQuery()['cursor'] ?? null;
     $limit = isset($request->getQuery()['limit']) ? (int)$request->getQuery()['limit'] : null;
 

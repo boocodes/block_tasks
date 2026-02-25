@@ -62,7 +62,6 @@ abstract class Model
         if ($result === false) {
             return [];
         } else {
-            var_dump($result);
             return json_decode($result, true);
         }
     }
@@ -100,6 +99,10 @@ abstract class Model
         $currentIdempotencyKey = $_SERVER['HTTP_IDEMPOTENCY_KEY'] ?? null;
 
         $instanceFields = get_class_vars(get_class($this));
+
+        if(array_key_exists('createdAt', $instanceFields)) {
+            $result['createdAt'] = new \DateTimeImmutable()->format('c');
+        }
 
         $newResultId = uniqid();
 
@@ -156,12 +159,17 @@ abstract class Model
             return [];
         }
         $result = $this->validateInputDataByInstance($data);
+        $taskFoundFlag = false;
         foreach ($previousData as &$row) {
             if ($row['id'] === $id) {
+                $taskFoundFlag = true;
                 $idValue = $row['id'];
                 $row = $result;
                 $row['id'] = $idValue;
             }
+        }
+        if(!$taskFoundFlag) {
+            return [];
         }
         unset($row);
         file_put_contents(__DIR__ . '/../../' . $tableName . '.json', json_encode($previousData, JSON_PRETTY_PRINT));

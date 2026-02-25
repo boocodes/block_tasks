@@ -12,6 +12,7 @@ class Task extends Model
     public string $id;
     public string $title;
     public string $description;
+    public string $createdAt;
     public TaskStatus $status;
     public array $required = ['title'];
 }

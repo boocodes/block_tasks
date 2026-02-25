@@ -1,29 +1,172 @@
-openapi: 3.0.3
+openapi: 3.0.0
 info:
-  title: API
-  version: 0.1.0
+  title: 'Tasks CRUD'
+  version: 0.0.1
+  description: 'Tasks CRUD'
 servers:
-  url: http://localhost:5173
-
+  - url: http://127.0.0.1:5173
 components:
-  headers:
-    Idempotency-key:
-      name: 'Idempotency-key'
+  parameters:
+    TaskId:
+      name: id
+      in: query
+      required: true
+      schema:
+        type: string
+        example: '3131_dd23'
+    StatusQuery:
+      name: status
+      in: query
+      required: false
+      schema:
+        type: string
+        enum: ['new', 'in_progress', 'done']
+        example: 'new'
+    LimitQuery:
+      name: limit
+      in: query
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: null
+        example: 10
+    CursorQuery:
+      name: cursor_query
+      in: query
+      schema:
+        type: string
+        example: '21310_d322'
+    IdempotencyKeyHeader:
+      name: idempotency-key
       in: header
       required: false
-      description: 'Unique key allowed pass creating equal tasks'
       schema:
         type: string
         format: uuid
+        example: '31301_Dwdwdw'
   securitySchemes:
     BearerAuth:
       type: http
-      scheme:
-        bearer
+      scheme: bearer
       bearerFormat: JWT
+  headers:
+    WWW_Authenticate:
+      description: 'Authenticate'
+      schema:
+        type: string
+      example: Bearer
+    Access-Control-Allow-Origin:
+      description: 'Allowed origin'
+      schema:
+        type: string
+      example: http://127.0.0.1:5173
+    Access-Control-Allow-Headers:
+      description: 'Allowed headers'
+      schema:
+        type: array
+      example: ['Content-Type', 'Authorization', 'Idempotency-Key']
+    Access-Control-Allow-Methods:
+      description: 'Allowed methods'
+      schema:
+        type: array
+      example: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS']
+    Content-Type:
+      description: 'Allowed content type'
+      schema:
+        type: string
+      example: 'application/json'
   schemas:
+    TaskEdit:
+      type: object
+      description: 'Task object to edit task'
+      properties:
+        title:
+          type: string
+          description: 'Tasks title field'
+          example: 'Task title'
+        description:
+          type: string
+          description: 'Tasks additional description field'
+          example: 'About tasks data'
+        status:
+          type: string
+          description: 'Current task status'
+          enum: [ 'new', 'in_progress', 'done' ]
+          default: 'new'
+          example: 'done'
+      required:
+        - title
+        - status
+    TaskCreate:
+      type: object
+      description: 'Task object to create task'
+      properties:
+        title:
+          type: string
+          description: 'Tasks title field'
+          example: 'Task title'
+        description:
+          type: string
+          description: 'Tasks additional description field'
+          example: 'About tasks data'
+        status:
+          type: string
+          description: 'Current task status'
+          enum: [ 'new', 'in_progress', 'done' ]
+          default: 'new'
+          example: 'done'
+      required:
+        - title
+        - status
+    Task:
+      type: object
+      description: 'Task object'
+      properties:
+        id:
+          type: integer
+          description: 'Unique id'
+          example: 123
+        title:
+          type: string
+          description: 'Tasks title field'
+          example: 'Task title'
+        description:
+          type: string
+          description: 'Tasks additional description field'
+          example: 'About tasks data'
+        status:
+          type: string
+          description: 'Current task status'
+          enum: ['new', 'in_progress', 'done']
+          default: 'new'
+          example: 'done'
+        created_at:
+          type: string
+          format: date-time
+          description: 'Date of creating task on server'
+          example: '2026-02-25T10:28:50+00:00'
+      required:
+        - title
+        - status
+    TaskList:
+      type: object
+      description: 'Tasks list'
+      properties:
+        items:
+          type: array
+          description: 'Tasks list'
+          items:
+            $ref: '#/components/schemas/Task'
+        nextCursor:
+          type: string
+          nullable: true
+          description: 'Cursor for pagination'
+          example: '13r1_Fwefw'
     UnauthorizedError:
       type: object
+      description: 'Unauthorized error. No authenticate header'
       properties:
         code:
           type: integer
@@ -31,222 +174,251 @@ components:
         message:
           type: string
           example: 'Unauthorized'
-    Error:
+    ForbiddenError:
       type: object
+      description: 'Access Error. Wrong Token'
       properties:
         code:
           type: integer
-          example: 400
-        message:
-          type: string
-          example: 'Validation error'
-        errors:
-          type: object
-          additionalProperties:
-            type: string
-            example:
-              {
-                "title": 'Title can not be empty',
-                "status": 'Status must be one of these: in_progress, done, new'
-              }
-    TaskListResponse:
+          example: 403
+    ConflictError:
       type: object
+      description: Error idempotency
       properties:
-        items:
-          type: array
-          description: 'Tasks list'
-          items:
-            $ref: '#/components/schemas/Task';
-        nextCursor:
-          type: string
-          nullable: true
-          description: 'Cursor for next page'
-          example: 'few9f2933121-q'
-      required:
-        - items
-    Task:
+        code:
+          type: integer
+          example: 409
+    ValidationError:
       type: object
+      description: 'Error validation'
       properties:
-        id:
-          type: string
-          format: uuid
-          description: 'Unique identification'
-          example: '122343fwfwe9323d-dwqdq'
-        title:
-          type: string
-          description: 'Task title field'
-          example: 'Main text to do'
-        description:
-          type: string
-          description: 'Task description field'
-          example: 'About text'
-        status:
-          type: string
-          description: 'Current task status: new | in_progress | done'
-          example: 'new'
-        created_at:
-          type: string
-          format: date-time
-          description: 'Date of creating task'
-          example: "2000-01-11"
-      required:
-        - title
-        - status
+        code:
+          type: integer
+          example: 422
+    NotFoundError:
+      type: object
+      description: 'Resource not found'
+      properties:
+        code:
+          type: integer
+          example: 404
   responses:
-    Unauthorize:
-      description: 'Unauthorized'
+    UnauthorizedResponse:
+      description: 'Header authorization do not exist'
+      headers:
+        WWW_Authenticate:
+          $ref: '#/components/headers/WWW_Authenticate'
+        Access-Control-Allow-Origin:
+          $ref: '#/components/headers/Access-Control-Allow-Origin'
+        Access-Control-Allow-Methods:
+          $ref: '#/components/headers/Access-Control-Allow-Methods'
+        Access-Control-Allow-Headers:
+          $ref: '#/components/headers/Access-Control-Allow-Headers'
+        Content-Type:
+          $ref: '#/components/headers/Content-Type'
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/UnauthorizedError'
+    ValidationErrorResponse:
+      description: 'Validation error'
+      headers:
+        WWW_Authenticate:
+          $ref: '#/components/headers/WWW_Authenticate'
+        Access-Control-Allow-Origin:
+          $ref: '#/components/headers/Access-Control-Allow-Origin'
+        Access-Control-Allow-Methods:
+          $ref: '#/components/headers/Access-Control-Allow-Methods'
+        Access-Control-Allow-Headers:
+          $ref: '#/components/headers/Access-Control-Allow-Headers'
+        Content-Type:
+          $ref: '#/components/headers/Content-Type'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ValidationError'
+    ForbiddenResponse:
+      description: 'Error authenticate token'
+      headers:
+        WWW_Authenticate:
+          $ref: '#/components/headers/WWW_Authenticate'
+        Access-Control-Allow-Origin:
+          $ref: '#/components/headers/Access-Control-Allow-Origin'
+        Access-Control-Allow-Methods:
+          $ref: '#/components/headers/Access-Control-Allow-Methods'
+        Access-Control-Allow-Headers:
+          $ref: '#/components/headers/Access-Control-Allow-Headers'
+        Content-Type:
+          $ref: '#/components/headers/Content-Type'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ForbiddenError'
+    ConflictResponse:
+      description: 'Idempotency conflict'
+      headers:
+        WWW_Authenticate:
+          $ref: '#/components/headers/WWW_Authenticate'
+        Access-Control-Allow-Origin:
+          $ref: '#/components/headers/Access-Control-Allow-Origin'
+        Access-Control-Allow-Methods:
+          $ref: '#/components/headers/Access-Control-Allow-Methods'
+        Access-Control-Allow-Headers:
+          $ref: '#/components/headers/Access-Control-Allow-Headers'
+        Content-Type:
+          $ref: '#/components/headers/Content-Type'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ConflictError'
     TaskResponse:
-      description: 'Success'
+      description: 'Success task value'
+      headers:
+        WWW_Authenticate:
+          $ref: '#/components/headers/WWW_Authenticate'
+        Access-Control-Allow-Origin:
+          $ref: '#/components/headers/Access-Control-Allow-Origin'
+        Access-Control-Allow-Methods:
+          $ref: '#/components/headers/Access-Control-Allow-Methods'
+        Access-Control-Allow-Headers:
+          $ref: '#/components/headers/Access-Control-Allow-Headers'
+        Content-Type:
+          $ref: '#/components/headers/Content-Type'
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Task'
     TaskListResponse:
-      description: 'Success'
+      description: 'Tasks list success found'
+      headers:
+        WWW_Authenticate:
+          $ref: '#/components/headers/WWW_Authenticate'
+        Access-Control-Allow-Origin:
+          $ref: '#/components/headers/Access-Control-Allow-Origin'
+        Access-Control-Allow-Methods:
+          $ref: '#/components/headers/Access-Control-Allow-Methods'
+        Access-Control-Allow-Headers:
+          $ref: '#/components/headers/Access-Control-Allow-Headers'
+        Content-Type:
+          $ref: '#/components/headers/Content-Type'
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/TaskListResponse'
-    BadRequest:
-      description: 'Error request'
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-    NotFound:
+            $ref: '#/components/schemas/TaskList'
+    NotFoundResponse:
       description: 'Not found'
+      headers:
+        WWW_Authenticate:
+          $ref: '#/components/headers/WWW_Authenticate'
+        Access-Control-Allow-Origin:
+          $ref: '#/components/headers/Access-Control-Allow-Origin'
+        Access-Control-Allow-Methods:
+          $ref: '#/components/headers/Access-Control-Allow-Methods'
+        Access-Control-Allow-Headers:
+          $ref: '#/components/headers/Access-Control-Allow-Headers'
+        Content-Type:
+          $ref: '#/components/headers/Content-Type'
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Error'
-    ValidationError:
-      description: 'Error validation'
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-  parameters:
-    StatusQuery:
-      name: status
-      in: query
-      required: false
-      description: "Status of current task"
-      schema:
-        type: string
-        enum:
-          - in_progress
-          - done
-          - new
-      example: "in_progress"
-    LimitQuery:
-      name: limit
-      in: query
-      required: false
-      description: "Define max count of display tasks"
-      schema:
-        type: string
-        minimum: 1
-        maximum: 100
-      example: 10
-    CursorQuery:
-      name: cursor
-      in: query
-      required: false
-      description: "Cursor for pagination tasks list"
-      schema:
-        type: string
-        format: uuid
-      example: "4392e92d-dqwdd21"
-    TaskId:
-      name: id
-      in: path
-      required: true
-      schema:
-        type: string
-        format: uuid
+            $ref: '#/components/schemas/NotFoundError'
 tags:
-  - name: 'Task'
-security:
-  - BearerAuth: []
+  - name: Task
 paths:
   /tasks:
+    options:
+      summary: Preflight CORS request
+      tags:
+        - Task
+      responses: 
+        '204':
+          description: 'CORS preflight success'
+          headers:
+            Access-Control-Allow-Origin:
+              $ref: '#/components/headers/Access-Control-Allow-Origin'
+            Access-Control-Allow-Methods:
+              $ref: '#/components/headers/Access-Control-Allow-Methods'
+            Access-Control-Allow-Headers:
+              $ref: '#/components/headers/Access-Control-Allow-Headers'
     post:
+      summary: Creating new task
       tags:
         - Task
       security:
         - BearerAuth: []
-      summary: Создание задачи
-      description: 'Create a new task by input data'
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKeyHeader'
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Task'
+              $ref: '#/components/schemas/TaskCreate'
       responses:
-        '401':
-          $ref: '#/components/responses/Unauthorize'
         '201':
-          description: 'Successfully created'
+          description: 'Task successfully created'
           headers:
-            Location:
-              description: 'URL'
-              schema:
-                type: string
-                format: uri
-              example: '/tasks'
+            WWW_Authenticate:
+              $ref: '#/components/headers/WWW_Authenticate'
+            Access-Control-Allow-Origin:
+              $ref: '#/components/headers/Access-Control-Allow-Origin'
+            Access-Control-Allow-Methods:
+              $ref: '#/components/headers/Access-Control-Allow-Methods'
+            Access-Control-Allow-Headers:
+              $ref: '#/components/headers/Access-Control-Allow-Headers'
+            Content-Type:
+              $ref: '#/components/headers/Content-Type'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Task'
+        '401':
+          $ref: '#/components/responses/UnauthorizedResponse'
+        '403':
+          $ref: '#/components/responses/ForbiddenResponse'
         '409':
-          $ref: '#/components/schemas/Error'
+          $ref: '#/components/responses/ConflictResponse'
     get:
       summary: 'Get tasks list'
-      description: 'Return tasks list array'
       tags:
         - Task
       security:
-        - BearerAuth: [ ]
+        - BearerAuth: []
       parameters:
         - $ref: '#/components/parameters/StatusQuery'
         - $ref: '#/components/parameters/LimitQuery'
         - $ref: '#/components/parameters/CursorQuery'
       responses:
         '200':
-          $ref: '#/components/schemas/TaskListResponse'
-        '400':
-          $ref: '#/components/schemas/Error'
+          $ref: '#/components/schemas/TaskList'
         '401':
-          $ref: '#/components/responses/Unauthorize'
+          $ref: '#/components/responses/UnauthorizedResponse'
+        '403':
+          $ref: '#/components/responses/ForbiddenResponse'
   /tasks/{id}:
     get:
-      summary: 'Get task by id'
-      description: 'Get current task by finding id'
+      summary: 'Get task by unique id'
       tags:
         - Task
       security:
-        - BearerAuth: [ ]
+        - BearerAuth: []
       parameters:
         - $ref: '#/components/parameters/TaskId'
       responses:
         '200':
-          $ref: '#/components/schemas/Task'
-        '404':
-          $ref: '#/components/schemas/Error'
+          $ref: '#/components/responses/TaskResponse'
         '401':
-          $ref: '#/components/responses/Unauthorize'
+          $ref: '#/components/responses/UnauthorizedResponse'
+        '403':
+          $ref: '#/components/responses/ForbiddenResponse'
+        '404':
+          $ref: '#/components/responses/NotFoundResponse'
     patch:
-      summary: 'Edit task'
-      description: 'Edit task'
+      summary: 'Edit task by unique id'
       tags:
         - Task
       security:
-        - BearerAuth: [ ]
+        - BearerAuth: []
       parameters:
         - $ref: '#/components/parameters/TaskId'
       requestBody:
@@ -254,27 +426,38 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Task'
+              $ref: '#/components/schemas/TaskEdit'
       responses:
         '200':
-          $ref: '#/components/schemas/Task'
-        '422':
-          $ref: '#/components/schemas/Error'
+          $ref: '#/components/responses/TaskResponse'
         '401':
-          $ref: '#/components/responses/Unauthorize'
+          $ref: '#/components/responses/UnauthorizedResponse'
+        '403':
+          $ref: '#/components/responses/ForbiddenResponse'
+        '422':
+          $ref: '#/components/responses/ValidationErrorResponse'
     delete:
-      summary: 'Delete current task'
-      description: 'Delete current task by id'
+      summary: 'Delete task by id'
       tags:
-        - Task
+        - Tasks
+      security:
+        - BearerAuth: []
       parameters:
         - $ref: '#/components/parameters/TaskId'
       responses:
-        '204':
-          $ref: '#/components/schemas/Task'
-        '404':
-          $ref: '#/components/schemas/Error'
+        '204': 
+          description: "No content"
+          content:
+            {}
         '401':
-          $ref: '#/components/responses/Unauthorize'
+          $ref: '#/components/responses/UnauthorizedResponse'
+        '403':
+          $ref: '#/components/responses/ForbiddenResponse'
+        '404':
+          $ref: '#/components/responses/NotFoundResponse'
 
+
+        
+
+          
 
