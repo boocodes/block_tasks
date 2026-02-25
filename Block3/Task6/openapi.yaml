@@ -9,7 +9,7 @@ components:
   parameters:
     TaskId:
       name: id
-      in: query
+      in: path
       required: true
       schema:
         type: string
@@ -52,6 +52,12 @@ components:
       scheme: bearer
       bearerFormat: JWT
   headers:
+    Location:
+      description: 'URL of created task'
+      schema:
+        type: string
+        format: uri
+      example: /tasks/49214
     WWW_Authenticate:
       description: 'Authenticate'
       schema:
@@ -65,13 +71,13 @@ components:
     Access-Control-Allow-Headers:
       description: 'Allowed headers'
       schema:
-        type: array
-      example: ['Content-Type', 'Authorization', 'Idempotency-Key']
+        type: string
+      example: 'Content-Type, Authorization, Idempotency-Key'
     Access-Control-Allow-Methods:
       description: 'Allowed methods'
       schema:
-        type: array
-      example: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS']
+        type: string
+      example: 'GET, POST, PATCH, DELETE, OPTIONS'
     Content-Type:
       description: 'Allowed content type'
       schema:
@@ -80,6 +86,7 @@ components:
   schemas:
     TaskEdit:
       type: object
+      minProperties: 1
       description: 'Task object to edit task'
       properties:
         title:
@@ -96,9 +103,6 @@ components:
           enum: [ 'new', 'in_progress', 'done' ]
           default: 'new'
           example: 'done'
-      required:
-        - title
-        - status
     TaskCreate:
       type: object
       description: 'Task object to create task'
@@ -214,8 +218,6 @@ components:
           $ref: '#/components/headers/Access-Control-Allow-Methods'
         Access-Control-Allow-Headers:
           $ref: '#/components/headers/Access-Control-Allow-Headers'
-        Content-Type:
-          $ref: '#/components/headers/Content-Type'
       content:
         application/json:
           schema:
@@ -231,8 +233,6 @@ components:
           $ref: '#/components/headers/Access-Control-Allow-Methods'
         Access-Control-Allow-Headers:
           $ref: '#/components/headers/Access-Control-Allow-Headers'
-        Content-Type:
-          $ref: '#/components/headers/Content-Type'
       content:
         application/json:
           schema:
@@ -248,8 +248,6 @@ components:
           $ref: '#/components/headers/Access-Control-Allow-Methods'
         Access-Control-Allow-Headers:
           $ref: '#/components/headers/Access-Control-Allow-Headers'
-        Content-Type:
-          $ref: '#/components/headers/Content-Type'
       content:
         application/json:
           schema:
@@ -265,8 +263,6 @@ components:
           $ref: '#/components/headers/Access-Control-Allow-Methods'
         Access-Control-Allow-Headers:
           $ref: '#/components/headers/Access-Control-Allow-Headers'
-        Content-Type:
-          $ref: '#/components/headers/Content-Type'
       content:
         application/json:
           schema:
@@ -282,8 +278,6 @@ components:
           $ref: '#/components/headers/Access-Control-Allow-Methods'
         Access-Control-Allow-Headers:
           $ref: '#/components/headers/Access-Control-Allow-Headers'
-        Content-Type:
-          $ref: '#/components/headers/Content-Type'
       content:
         application/json:
           schema:
@@ -299,8 +293,6 @@ components:
           $ref: '#/components/headers/Access-Control-Allow-Methods'
         Access-Control-Allow-Headers:
           $ref: '#/components/headers/Access-Control-Allow-Headers'
-        Content-Type:
-          $ref: '#/components/headers/Content-Type'
       content:
         application/json:
           schema:
@@ -316,8 +308,6 @@ components:
           $ref: '#/components/headers/Access-Control-Allow-Methods'
         Access-Control-Allow-Headers:
           $ref: '#/components/headers/Access-Control-Allow-Headers'
-        Content-Type:
-          $ref: '#/components/headers/Content-Type'
       content:
         application/json:
           schema:
@@ -358,6 +348,8 @@ paths:
         '201':
           description: 'Task successfully created'
           headers:
+            Location:
+              $ref: '#/components/headers/Location'
             WWW_Authenticate:
               $ref: '#/components/headers/WWW_Authenticate'
             Access-Control-Allow-Origin:
@@ -366,8 +358,6 @@ paths:
               $ref: '#/components/headers/Access-Control-Allow-Methods'
             Access-Control-Allow-Headers:
               $ref: '#/components/headers/Access-Control-Allow-Headers'
-            Content-Type:
-              $ref: '#/components/headers/Content-Type'
           content:
             application/json:
               schema:
@@ -390,7 +380,7 @@ paths:
         - $ref: '#/components/parameters/CursorQuery'
       responses:
         '200':
-          $ref: '#/components/schemas/TaskList'
+          $ref: '#/components/responses/TaskListResponse'
         '401':
           $ref: '#/components/responses/UnauthorizedResponse'
         '403':
@@ -439,7 +429,7 @@ paths:
     delete:
       summary: 'Delete task by id'
       tags:
-        - Tasks
+        - Task
       security:
         - BearerAuth: []
       parameters:

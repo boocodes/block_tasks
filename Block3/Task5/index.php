@@ -103,6 +103,7 @@ $appInstance->addPostRoute('/tasks', function (Request $request) {
     else
     {
         http_response_code(201);
+        header('Location: /tasks/' . $result['id']);
         echo json_encode($result);
     }
 }, [new BearerToken()]);
