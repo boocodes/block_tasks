@@ -141,7 +141,6 @@ abstract class Model
             $result['id'] = $newResultId;
         }
         $previousData[] = $result;
-        file_put_contents(__DIR__ . '/../../' . 'idempotency.json', json_encode($idempotencyKeysList));
         file_put_contents(__DIR__ . '/../../' . $tableName . '.json', json_encode($previousData, JSON_PRETTY_PRINT));
         return $result;
     }
