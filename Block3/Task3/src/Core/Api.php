@@ -19,11 +19,7 @@ Routes::post('/tasks', function (Request $request) {
 
         if($taskCreatingResult)
         {
-            Sender::SendJsonResponse(['id' => $task->id,
-                'title' => $task->title,
-                'description' => $task->description,
-                'status' => $task->status,
-                'createdAt' => $task->createdAt], 201);
+            Sender::SendJsonResponse($taskCreatingResult, 201);
         }
         else
         {

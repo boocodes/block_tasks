@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Task2\Core;
+namespace Task4\Core;
 
 class Sender
 {

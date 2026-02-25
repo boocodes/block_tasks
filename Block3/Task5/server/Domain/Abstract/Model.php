@@ -155,16 +155,16 @@ abstract class Model
         }
         $previousData = json_decode(file_get_contents(__DIR__ . '/../../' . $tableName . '.json'), true);
 
-        if (!$this->checkRequiredData($data)) {
-            return [];
-        }
+//        if (!$this->checkRequiredData($data)) {
+//            return [];
+//        }
         $result = $this->validateInputDataByInstance($data);
         $taskFoundFlag = false;
         foreach ($previousData as &$row) {
             if ($row['id'] === $id) {
                 $taskFoundFlag = true;
                 $idValue = $row['id'];
-                $row = $result;
+                $row = array_merge($row, $result);
                 $row['id'] = $idValue;
             }
         }

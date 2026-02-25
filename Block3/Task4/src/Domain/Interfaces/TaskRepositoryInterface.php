@@ -1,7 +1,7 @@
 <?php
 
-namespace Task2\Domain\Interfaces;
-use Task2\Application\DTO\Task;
+namespace Task4\Domain\Interfaces;
+use Task4\Application\DTO\Task;
 
 interface TaskRepositoryInterface
 {

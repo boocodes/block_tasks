@@ -17,12 +17,12 @@ $appInstance->addPostRoute('/webhook-receiver', function (Request $request) {
 
     $logFile = __DIR__ . '/var/logs/webhook.log';
     $logEntry = [
-        'timestamp' => data('Y-m-d H:i:s'),
+        'timestamp' => date('Y-m-d H:i:s'),
         'payload' => $payload,
         'headers' => $request->getHeaders(),
     ];
     file_put_contents($logFile, json_encode($logEntry, JSON_PRETTY_PRINT) . PHP_EOL, FILE_APPEND);
-    http_response_code(404);
+    http_response_code(201);
     echo json_encode(['status' => 'received']);
 });
 
@@ -90,7 +90,8 @@ $appInstance->addGetRoute('/tasks', function (Request $request) {
 //>> }
 //>> "@ http://127.0.0.1:8000/tasks
 $appInstance->addPostRoute('/tasks', function (Request $request) {
-    $result = new Task()->add($request->getBody(), '');
+    $result = new Task()->add($request->getBody());
+    echo json_encode($result);
 }, [new BearerToken()]);
 //curl.exe -X PATCH -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c" -H "Content-Type: application/json" -d @"
 //>> {
@@ -100,9 +101,17 @@ $appInstance->addPostRoute('/tasks', function (Request $request) {
 //>> "@ http://127.0.0.1:8000/tasks/6998726dbbe73
 $appInstance->addPatchRoute('/tasks/{id}', function (Request $request, $id) {
     $result = new Task()->editById($id, $request->getBody());
-});
+    if(empty($result)) {
+        http_response_code(422);
+    }
+    else
+    {
+        http_response_code(200);
+        echo json_encode($result);
+    }
+}, [new BearerToken()]);
 //curl.exe -X DELETE -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c" -H "Content-Type: application/json" http://127.0.0.1:8000/tasks/10
 $appInstance->addDeleteRoute('/tasks/{id}', function (Request $request, $id) {
     $result = new Task()->deleteById($id);
-});
+}, [new BearerToken()]);
 $appInstance->run();

@@ -1,9 +1,9 @@
 <?php
 
-namespace Task2\Core;
+namespace Task4\Core;
 require_once 'Api.php';
 
-use Task2\Core\Request;
+use Task4\Core\Request;
 
 class App
 {

@@ -79,7 +79,7 @@ Routes::delete('/task/{$id}', function (Request $request, $id) {
     if ($result) {
         http_response_code(204);
     } else {
-        http_response_code(400);
+        http_response_code(404);
     }
 });
 
@@ -90,16 +90,10 @@ Routes::patch('/task/{$id}', function (Request $request, $id) {
     $newDescription = $inputJson['description'] ?? null;
     $newStatus =  isset($inputJson['status']) ? (StatusEnum::tryFrom($inputJson['status'])) : null;
     $result = $taskRepository->updateTask($id, $newTitle, $newDescription, $newStatus);
-    if ($result) {
-        Sender::SendJsonResponse([
-            'status' => 'ok',
-                'message' => 'Task with id ' . $id . ' has been updated.',
-        ], 200);
+    if (!empty($result)) {
+        Sender::SendJsonResponse($result, 200);
     } else {
-        Sender::SendJsonResponse([
-            'status' => 'error',
-                'message' => 'Task with id ' . $id . ' cannot be updated.',
-        ], 422);
+        Sender::SendJsonResponse([], 422);
     }
 });
 

@@ -30,11 +30,10 @@ class TaskRepository implements TaskRepositoryInterface
     {
         return $this->jsonStoragePath;
     }
-    public function addTaskWithIdempotencyKey(Task $task): bool
+    public function addTaskWithIdempotencyKey(Task $task): array
     {
         if(!isset($_SERVER['HTTP_IDEMPOTENCY_KEY'])) {
-            $this->addTask($task);
-            return true;
+            return $this->addTask($task);
         }
 
         $currentIdempotencyKey = $_SERVER['HTTP_IDEMPOTENCY_KEY'];
@@ -46,8 +45,7 @@ class TaskRepository implements TaskRepositoryInterface
                 'idempotency_key' => $currentIdempotencyKey,
             ];
             file_put_contents($this->idempotencyKeysPath, json_encode([$newIdempotencyValue], JSON_PRETTY_PRINT));
-            $this->addTask($task);
-            return true;
+            return $this->addTask($task);
         }
         $previousIdempotencyKeys = json_decode($previousIdempotencyKeys, true);
         foreach ($previousIdempotencyKeys as $key => $value)
@@ -60,9 +58,10 @@ class TaskRepository implements TaskRepositoryInterface
                 {
                     $newTask = $this->addTask($task);
                     // delete idempotency key
-                    $previousIdempotencyKeys[$key]['task_id'] = $newTask->id;
+                    $previousIdempotencyKeys[$key]['task_id'] = $newTask['id'];
                     file_put_contents($this->idempotencyKeysPath, json_encode($previousIdempotencyKeys, JSON_PRETTY_PRINT));
-                    return true;
+
+                    return $newTask;
                 }
                 else
                 {
@@ -72,11 +71,12 @@ class TaskRepository implements TaskRepositoryInterface
                         $searchingTask['status'] === $task->status->value
                     )
                     {
-                        return true;
+                        $task->id = $searchingTask['id'];
+                        return $task->toArray();
                     }
                     else
                     {
-                        return false;
+                        return [];
                     }
 
                 }
@@ -89,8 +89,7 @@ class TaskRepository implements TaskRepositoryInterface
         ];
         $previousIdempotencyKeys[] = $newIdempotencyValue;
         file_put_contents($this->idempotencyKeysPath, json_encode($previousIdempotencyKeys, JSON_PRETTY_PRINT));
-        $this->addTask($task);
-        return true;
+        return $this->addTask($task);
     }
 
     public function setJsonStoragePath(string $jsonStoragePath): void
@@ -112,18 +111,19 @@ class TaskRepository implements TaskRepositoryInterface
         return [];
     }
 
-    public function addTask(Task $task): Task
+    public function addTask(Task $task): array
     {
         $data = json_decode(file_get_contents($this->getJsonStoragePath()), true);
-        $data[] = [
+        $newTask = [
             'id' => $task->id,
             'title' => $task->title,
             'description' => $task->description,
             'status' => $task->status->value,
             'created_at' => $task->createdAt,
         ];
+        $data[] = $newTask;
         file_put_contents($this->getJsonStoragePath(), json_encode($data, JSON_PRETTY_PRINT));
-        return $task;
+        return $newTask;
     }
 
     public function getTasks(): array

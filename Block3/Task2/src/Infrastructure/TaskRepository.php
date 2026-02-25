@@ -104,20 +104,22 @@ class TaskRepository implements TaskRepositoryInterface
 
     }
 
-    public function updateTask(string $id, null|string $title = "", null|string $description = "", null|StatusEnum $status = StatusEnum::New): bool
+    public function updateTask(string $id, null|string $title = "", null|string $description = "", null|StatusEnum $status = StatusEnum::New): array
     {
         $data = json_decode(file_get_contents($this->getJsonStoragePath()), true);
+        $result = [];
         foreach ($data as &$task) {
             if ($task['id'] == $id) {
                 $task['title'] = $title ?? $task['title'];
                 $task['description'] = $description ?? $task['description'];
                 $task['status'] = $status === null ? $task['status'] : $status->value;
+                $result = $task;
                 file_put_contents($this->getJsonStoragePath(), json_encode($data), JSON_PRETTY_PRINT);
-                return true;
+                return $result;
             }
         }
         unset($task);
-        return false;
+        return [];
     }
 
     public function deleteTask(string $id): bool

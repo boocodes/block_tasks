@@ -9,32 +9,32 @@ class ComposerStaticInit0d6869426d61ed574365b2007c53b1a2
     public static $prefixLengthsPsr4 = array (
         'T' =>
         array (
-            'Task2\\Infrastructure\\' => 21,
-            'Task2\\Domain\\' => 13,
-            'Task2\\Core\\' => 11,
-            'Task2\\Application\\' => 18,
-            'Task2\\' => 6,
+            'Task4\\Infrastructure\\' => 21,
+            'Task4\\Domain\\' => 13,
+            'Task4\\Core\\' => 11,
+            'Task4\\Application\\' => 18,
+            'Task4\\' => 6,
         ),
     );
 
     public static $prefixDirsPsr4 = array (
-        'Task2\\Infrastructure\\' =>
+        'Task4\\Infrastructure\\' =>
         array (
             0 => __DIR__ . '/../..' . '/src/Infrastructure',
         ),
-        'Task2\\Domain\\' =>
+        'Task4\\Domain\\' =>
         array (
             0 => __DIR__ . '/../..' . '/src/Domain',
         ),
-        'Task2\\Core\\' =>
+        'Task4\\Core\\' =>
         array (
             0 => __DIR__ . '/../..' . '/src/Core',
         ),
-        'Task2\\Application\\' =>
+        'Task4\\Application\\' =>
         array (
             0 => __DIR__ . '/../..' . '/src/Application',
         ),
-        'Task2\\' =>
+        'Task4\\' =>
         array (
             0 => __DIR__ . '/../..' . '/src',
         ),

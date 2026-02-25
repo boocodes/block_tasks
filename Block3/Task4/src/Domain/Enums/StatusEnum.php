@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Task2\Domain\Enums;
+namespace Task4\Domain\Enums;
 enum StatusEnum: string
 {
     case New = "new";

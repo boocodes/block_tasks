@@ -14,6 +14,23 @@ abstract class Model
         $this->webhookWorker = new WebHookWorker();
     }
 
+    private function normalizeArrayForComparison(array $array): array
+    {
+        $normalized = [];
+        foreach ($array as $key => $value) {
+            if ($value instanceof \BackedEnum) {
+                $normalized[$key] = $value->value;
+            } else if ($value instanceof \UnitEnum) {
+                $normalized[$key] = $value->name;
+            } else {
+                $normalized[$key] = $value;
+            }
+        }
+        return $normalized;
+    }
+
+
+
     private function checkRequiredData(array $data): bool
     {
         $requiredFields = get_class_vars(get_class($this))['required'] ?? [];
@@ -80,7 +97,7 @@ abstract class Model
         return [];
     }
 
-    public function add(array $data, string|null $idempotencyKey): array
+    public function add(array $data): array
     {
         $tableName = get_class_vars(get_class($this))['tableName'] ?? null;
         if ($tableName === NULL) {
@@ -93,47 +110,52 @@ abstract class Model
         }
         $result = $this->validateInputDataByInstance($data);
 
+
+        $currentIdempotencyKey = $_SERVER['HTTP_IDEMPOTENCY_KEY'] ?? null;
+
         $instanceFields = get_class_vars(get_class($this));
-        if (array_key_exists('id', $instanceFields)) {
-            $result['id'] = uniqid();
+
+        if(array_key_exists('createdAt', $instanceFields)) {
+            $result['createdAt'] = new \DateTimeImmutable()->format('c');
         }
 
+        $newResultId = uniqid();
 
-        $idempotencyKeysList = json_decode(file_get_contents(__DIR__ . '/../../' . 'idempotency' . '.json'), true);
-        if ($idempotencyKeysList === null || strlen(trim($idempotencyKey ?? '')) === 0) {
-            $previousData[] = $result;
-            var_dump('create new. Key do not set or key list do not exist');
-            if (strlen(trim($idempotencyKey ?? '')) > 0) {
-                $idempotencyKeysList[] = [
-                    'idempotencyKey' => $idempotencyKey,
-                    'id' => $result['id'],
-                ];
-                file_put_contents(__DIR__ . '/../../' . 'idempotency.json', json_encode($idempotencyKeysList));
-            }
-            file_put_contents(__DIR__ . '/../../' . $tableName . '.json', json_encode($previousData, JSON_PRETTY_PRINT));
-            return $result;
-        }
+        $idempotencyKeysList = json_decode(file_get_contents(__DIR__ . '/../../idempotency.json') ?? [], true);
 
-        foreach ($idempotencyKeysList as $key) {
-            if ($key['idempotencyKey'] === $idempotencyKey) {
-                $result = $this->getById($key['id']);
-                if (empty($result)) {
-                    http_response_code(409);
-                    header('Content-type: application/json');
-                    echo json_encode(['status' => 'error', 'message' => 'Idempotency Key not found']);
-                    return [];
+        if ($currentIdempotencyKey !== null) {
+            $newIdempotencyKeyData = [
+                'id' => $newResultId,
+                'idempotency_key' => $currentIdempotencyKey,
+            ];
+            if (!empty($idempotencyKeysList)) {
+                foreach ($idempotencyKeysList as $idempotencyKey => $idempotencyValue) {
+                    if ($idempotencyValue['idempotency_key'] === $currentIdempotencyKey) {
+                        $searchingEntity = $this->getById($idempotencyValue['id']);
+                        $compareResult = array_intersect_key($searchingEntity, $result);
+                        if ($this->normalizeArrayForComparison($compareResult) ==
+                            $this->normalizeArrayForComparison($result)
+                        ) {
+                            return $searchingEntity;
+                        } else if (empty($searchingEntity)) {
+                            unset($idempotencyKeysList[$idempotencyKey]);
+                            break;
+                        } else {
+                            return [];
+                        }
+                    }
                 }
-                var_dump("already exist. Return exist");
-                return $result;
             }
+            // not found
+            $idempotencyKeysList[] = $newIdempotencyKeyData;
+            file_put_contents(__DIR__ . '/../../idempotency.json', json_encode($idempotencyKeysList));
         }
-        var_dump('create new. Key dont found');
-        $idempotencyKeysList[] = [
-            'idempotencyKey' => $idempotencyKey,
-            'id' => $result['id'],
-        ];
+
+
+        if(array_key_exists('id', $instanceFields)) {
+            $result['id'] = $newResultId;
+        }
         $previousData[] = $result;
-        file_put_contents(__DIR__ . '/../../' . 'idempotency.json', json_encode($idempotencyKeysList));
         file_put_contents(__DIR__ . '/../../' . $tableName . '.json', json_encode($previousData, JSON_PRETTY_PRINT));
         return $result;
     }
@@ -147,15 +169,15 @@ abstract class Model
         }
         $previousData = json_decode(file_get_contents(__DIR__ . '/../../' . $tableName . '.json'), true);
 
-        if (!$this->checkRequiredData($data)) {
-            return [];
-        }
+//        if (!$this->checkRequiredData($data)) {
+//            return [];
+//        }
         $result = $this->validateInputDataByInstance($data);
         foreach ($previousData as &$row) {
             if ($row['id'] === $id) {
                 $idValue = $row['id'];
-                $row = $result;
-                $row['id'] = $idValue;
+                $row = array_merge($row, $result);
+                $result = $row;
                 if (isset($row['status'])) {
                     if ($row['status'] === TaskStatus::Done->value) {
                         $this->webhookWorker->work(
@@ -165,11 +187,16 @@ abstract class Model
                         );
                     }
                 }
+
             }
+            else
+            {
+                return [];
+            }
+
         }
         unset($row);
         file_put_contents(__DIR__ . '/../../' . $tableName . '.json', json_encode($previousData, JSON_PRETTY_PRINT));
-
         return $result;
     }
 

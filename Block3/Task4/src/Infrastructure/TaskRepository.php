@@ -1,11 +1,11 @@
 <?php
 
-namespace Task2\Infrastructure;
+namespace Task4\Infrastructure;
 
-use Task2\Application\DTO\Task;
-use Task2\Core\Sender;
-use Task2\Domain\Interfaces\TaskRepositoryInterface;
-use Task2\Core\App;
+use Task4\Application\DTO\Task;
+use Task4\Core\Sender;
+use Task4\Domain\Interfaces\TaskRepositoryInterface;
+use Task4\Core\App;
 
 class TaskRepository implements TaskRepositoryInterface
 {
