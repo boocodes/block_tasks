@@ -1,8 +1,8 @@
 {
-    "name": "java2/task1",
+    "name": "java2/task5",
     "autoload": {
         "psr-4": {
-            "API\\": "API"
+            "Task5\\": "server/"
         }
     },
     "authors": [
@@ -11,7 +11,5 @@
             "email": "felker.nick@bk.ru"
         }
     ],
-    "require": {
-        "symfony/http-foundation": "^8.0"
-    }
+    "require": {}
 }

@@ -1,10 +1,12 @@
 <?php
 
-namespace Task7\Domain\Enums;
+
+namespace Task5\Domain\Enums;
+
 
 enum TaskStatus: string
 {
     case NEW = 'new';
-    case InProgress = 'in_progress';
-    case Done = 'done';
+    case IN_PROGRESS = 'in_progress';
+    case DONE = 'done';
 }

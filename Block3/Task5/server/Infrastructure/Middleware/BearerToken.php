@@ -1,9 +1,9 @@
 <?php
 
-namespace Task5\Infrastructure\Middleware;
+namespace Task4\Infrastructure\Middleware;
 
-use Task5\Domain\Interfaces\Middleware;
-use Task5\Infrastructure\Request\Request;
+use Task4\Domain\Interfaces\Middleware;
+use Task4\Infrastructure\Request\Request;
 
 
 class BearerToken implements Middleware
@@ -14,10 +14,10 @@ class BearerToken implements Middleware
         $headerAuth = $request->getHeaders()['HTTP_AUTHORIZATION'] ?? $request->getHeaders()['Authorization'] ?? null;
         if($headerAuth === null || !isset($request->getConfig()['API_KEY'])) {
             header('WWW-Authenticate: Bearer');
-            header('HTTP/1.0 401 Unauthorized');
             header('Content-Type: application/json');
+            http_response_code(401);
             echo json_encode(['status' => 'error', 'message' => 'Authentication required']);
-            return false;
+            exit(0);
         }
 
         $headerToken = $request->getHeaders()['HTTP_AUTHORIZATION'] ?? $request->getHeaders()['Authorization'];
@@ -34,7 +34,7 @@ class BearerToken implements Middleware
             header('WWW-Authenticate: Bearer');
             http_response_code(403);
             echo json_encode(['status' => 'error', 'message' => 'Authorization wrong']);
-            return false;
+            exit(0);
         }
         return true;
     }

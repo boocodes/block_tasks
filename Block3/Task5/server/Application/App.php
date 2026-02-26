@@ -1,10 +1,10 @@
 <?php
 
-namespace Task5\Application;
+namespace Task4\Application;
 
-use Task5\Domain\Enums\HttpMethods;
-use Task5\Infrastructure\Request\Request;
-use Task5\Infrastructure\Route\Route;
+use Task4\Domain\Enums\HttpMethods;
+use Task4\Infrastructure\Request\Request;
+use Task4\Infrastructure\Route\Route;
 
 class App
 {
@@ -20,6 +20,10 @@ class App
     public function __construct(Request $request)
     {
         $this->request = $request;
+        $this->notFoundPageController = function ()
+        {
+            http_response_code(404);
+        };
     }
 
     public function addGetRoute(string $url, callable $callback, array $middleware = []): void

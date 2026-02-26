@@ -1,18 +1,17 @@
 <?php
 
-namespace Task5\Application\Model;
+namespace Task4\Application\Model;
+use Task4\Domain\Abstract\Model;
+use Task4\Domain\Enums\TaskStatus;
 
-
-use Task5\Domain\Abstract\Model;
-use Task5\Domain\Enums\TaskStatus;
 
 class Task extends Model
 {
     public string $tableName = 'tasks';
-    public string $id;
+    public int $id;
     public string $title;
-    public string $description;
+    public string $description = "Default description to task";
+    public TaskStatus $status = TaskStatus::NEW;
     public string $createdAt;
-    public TaskStatus $status;
     public array $required = ['title'];
 }

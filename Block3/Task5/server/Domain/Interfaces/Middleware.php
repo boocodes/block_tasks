@@ -1,9 +1,9 @@
 <?php
 
-namespace Task5\Domain\Interfaces;
+namespace Task4\Domain\Interfaces;
 
 
-use Task5\Infrastructure\Request\Request;
+use Task4\Infrastructure\Request\Request;
 
 interface Middleware
 {

@@ -6,9 +6,5 @@ $vendorDir = dirname(__DIR__);
 $baseDir = dirname($vendorDir);
 
 return array(
-    'Task4\\Infrastructure\\' => array($baseDir . '/src/Infrastructure'),
-    'Task4\\Domain\\' => array($baseDir . '/src/Domain'),
-    'Task4\\Core\\' => array($baseDir . '/src/Core'),
-    'Task4\\Application\\' => array($baseDir . '/src/Application'),
-    'Task4\\' => array($baseDir . '/src'),
+    'Task3\\' => array($baseDir . '/server'),
 );

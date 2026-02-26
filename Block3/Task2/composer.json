@@ -1,12 +1,8 @@
 {
-    "name": "java2/task2",
+    "name": "java2/task1",
     "autoload": {
         "psr-4": {
-            "Task2\\": "src/",
-            "Task2\\Core\\": "src/Core/",
-            "Task2\\Application\\": "src/Application/",
-            "Task2\\Domain\\": "src/Domain/",
-            "Task2\\Infrastructure\\": "src/Infrastructure/"
+            "Task1\\": "server/"
         }
     },
     "authors": [
