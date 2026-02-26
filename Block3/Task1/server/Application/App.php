@@ -1,10 +1,10 @@
 <?php
 
-namespace Task2\Application;
+namespace Task1\Application;
 
-use Task2\Domain\Enums\HttpMethods;
-use Task2\Infrastructure\Request\Request;
-use Task2\Infrastructure\Route\Route;
+use Task1\Domain\Enums\HttpMethods;
+use Task1\Infrastructure\Request\Request;
+use Task1\Infrastructure\Route\Route;
 
 class App
 {
