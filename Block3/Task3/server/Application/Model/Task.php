@@ -1,8 +1,8 @@
 <?php
 
-namespace Task2\Application\Model;
-use Task2\Domain\Abstract\Model;
-use Task2\Domain\Enums\TaskStatus;
+namespace Task3\Application\Model;
+use Task3\Domain\Abstract\Model;
+use Task3\Domain\Enums\TaskStatus;
 
 
 class Task extends Model

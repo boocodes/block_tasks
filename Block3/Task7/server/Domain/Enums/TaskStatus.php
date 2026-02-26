@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Task5\Domain\Enums;
+namespace Task7\Domain\Enums;
 
 
 enum TaskStatus: string

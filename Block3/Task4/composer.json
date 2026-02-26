@@ -1,8 +1,8 @@
 {
-    "name": "java2/task3",
+    "name": "java2/task4",
     "autoload": {
         "psr-4": {
-            "Task3\\": "server/"
+            "Task4\\": "server/"
         }
     },
     "authors": [

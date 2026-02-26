@@ -3,6 +3,8 @@
   <component name="NewModuleRootManager">
     <content url="file://$MODULE_DIR$">
       <sourceFolder url="file://$MODULE_DIR$/Block2/Task1" isTestSource="false" packagePrefix="Legacy" />
+      <excludeFolder url="file://$MODULE_DIR$/Block4/Task1/application/storage/app" />
+      <excludeFolder url="file://$MODULE_DIR$/Block4/Task1/application/storage/framework" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />

@@ -1,6 +1,8 @@
 <?php
 
-namespace Task1\Domain\Abstract;
+namespace Task2\Domain\Abstract;
+
+use App\Enums\Task;
 
 abstract class Model
 {
@@ -17,6 +19,8 @@ abstract class Model
                 $normalized[$key] = $value;
             }
         }
+        if (isset($array['id'])) unset($normalized['id']);
+        if (isset($array['createdAt'])) unset($normalized['createdAt']);
         return $normalized;
     }
 
@@ -24,6 +28,12 @@ abstract class Model
     {
         $requiredFields = get_class_vars(get_class($this))['required'] ?? [];
         if (empty($requiredFields)) return true;
+        //delete empty fields
+        foreach ($data as $key => $value) {
+            if (strlen(trim($value)) === 0) {
+                unset($data[$key]);
+            }
+        }
         $inputDataKeys = array_keys($data);
         $result = array_diff($requiredFields, $inputDataKeys);
         if (!empty($result)) {
@@ -36,18 +46,27 @@ abstract class Model
     private function validateInputDataByInstance(array $data): array
     {
         $instanceFields = get_class_vars(get_class($this)) ?? [];
+        $instanceArray = $instanceFields;
         $instanceFields = array_keys($instanceFields);
+
+        $data = array_intersect_key($data, $instanceArray);
+
         if (empty($instanceFields)) return [];
-
-        $result = [];
-
-        foreach ($instanceFields as $instanceKey) {
-            if (!isset($data[$instanceKey])) {
+        foreach ($instanceArray as $instanceKey => $instanceValue) {
+            if ($instanceKey === 'tableName' || $instanceKey === 'id' || $instanceKey === 'createdAt' || $instanceKey === 'required') {
                 continue;
             }
-            $result[$instanceKey] = $data[$instanceKey];
+            if ($instanceValue !== NULL) {
+                if (!isset($data[$instanceKey])) {
+                    $data[$instanceKey] = $instanceValue;
+                    continue;
+                }
+                if ($instanceValue instanceof \BackedEnum) {
+                    $data[$instanceKey] = $instanceValue::tryFrom($data[$instanceKey])->value ?? $instanceValue->value;
+                }
+            }
         }
-        return $result;
+        return $data;
     }
 
     public function getAllWhere(string $hook, string|int $value): array
@@ -64,14 +83,14 @@ abstract class Model
         $result = json_decode($result, true);
         $sortedResult = [];
         foreach ($result as $row) {
-            if($row[$hook] === $value) {
+            if ($row[$hook] === $value) {
                 $sortedResult[] = $row;
             }
         }
         return $sortedResult;
     }
 
-    public function getAll(string|null $limit, string|null $status, string|null $cursor): array
+    public function getAll(string|null $limit = null, string|null $cursor = null): array
     {
 
         $tableName = get_class_vars(get_class($this))['tableName'] ?? null;
@@ -86,40 +105,47 @@ abstract class Model
         }
 
         if ($limit !== null) {
-            $limit = (int)$limit;
-            if ($limit < 1) $limit = 1;
-            if ($limit > 100) $limit = 100;
+            if (!is_numeric($limit)) {
+                $limit = null;
+            } else {
+                $limit = (int)$limit;
+                if ($limit < 1) $limit = 1;
+                if ($limit > 100) $limit = 100;
+            }
         }
         $result = json_decode($result, true);
-
-        if ($status !== null) {
-            $filteredResult = [];
-            foreach ($result as $key) {
-                if (isset($key['status']) && $key['status'] === $status) {
-                    $filteredResult[] = $key;
-                }
-            }
-            $result = $filteredResult;
+        if (!is_array($result)) {
+            return [];
         }
-        $itemsList = [];
         $startIndex = 0;
+        $cursorFounded = false;
         if ($cursor !== null) {
             foreach ($result as $key => $value) {
-                if ($value['id'] === $cursor) {
-                    $startIndex = $cursor++;
+                if (isset($value['id']) && $value['id'] === $cursor) {
+                    $startIndex = $key;
+                    $cursorFounded = true;
+                    break;
                 }
             }
+            if (!$cursorFounded) {
+                return [];
+            }
         }
-        $result = array_slice($result, $startIndex, $limit);
+        $items = array_slice($result, $startIndex, $limit);
         $nextCursor = null;
-        if (count($result) === $limit && count($result) > $startIndex + $limit) {
-            $nextCursor = end($result)['id'];
+        if (!empty($items) && count($items) === $limit && $startIndex + $limit < count($result)) {
+            $nextElem = $result[$startIndex + $limit] ?? null;
+
+            if ($nextElem && isset($nextElem['id'])) {
+                $nextCursor = $nextElem['id'];
+            }
         }
-        http_response_code(200);
         $response = [
-            'items' => $result,
-            'nextCursor' => $nextCursor,
+            'items' => $items,
         ];
+        if ($nextCursor !== null) {
+            $response['nextCursor'] = $nextCursor;
+        }
         return $response;
     }
 
@@ -152,6 +178,7 @@ abstract class Model
         if (!$this->checkRequiredData($data)) {
             return [];
         }
+
         $previousData = json_decode(file_get_contents(__DIR__ . '/../../' . $tableName . '.json'), true);
 
         $result = $this->validateInputDataByInstance($data);
@@ -217,6 +244,7 @@ abstract class Model
         $previousData = json_decode(file_get_contents(__DIR__ . '/../../' . $tableName . '.json'), true);
 
         $result = $this->validateInputDataByInstance($data);
+
         $taskFoundFlag = false;
         foreach ($previousData as &$row) {
             if ($row['id'] === $id) {

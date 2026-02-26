@@ -1,6 +1,6 @@
 <?php
 
-namespace Task4\Infrastructure\Response;
+namespace Task5\Infrastructure\Response;
 
 
 class Response

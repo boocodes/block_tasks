@@ -1,11 +1,11 @@
 <?php
 
-use Task5\Application\App;
-use Task5\Infrastructure\Request\Request;
-use Task5\Infrastructure\Response\Response;
-use Task5\Application\Model\Task;
-use Task5\Infrastructure\Middleware\BearerToken;
-
+use Task7\Application\App;
+use Task7\Infrastructure\Request\Request;
+use Task7\Infrastructure\Response\Response;
+use Task7\Application\Model\Task;
+use Task7\Infrastructure\Middleware\BearerToken;
+use Task7\Infrastructure\WebHook\WebHookWorker;
 
 require_once __DIR__ . "/vendor/autoload.php";
 
@@ -76,5 +76,25 @@ $appInstance->addDeleteRoute('/tasks/{id}', function (Request $request, $id) {
         http_response_code(404);
     }
 }, [new BearerToken()]);
+
+
+$appInstance->addPostRoute('/webhook-receiver', function (Request $request) {
+    $payload = $request->getBody();
+    $logFile = __DIR__ . '/var/logs/webhook.log';
+    $logEntry = [
+        'timestamp' => date('Y-m-d H:i:s'),
+        'payload' => $payload,
+        'headers' => $request->getHeaders(),
+    ];
+    file_put_contents($logFile, json_encode($logEntry, JSON_PRETTY_PRINT). PHP_EOL, FILE_APPEND);
+    http_response_code(201);
+    echo json_encode(['status' => 'received']);
+});
+
+$appInstance->addGetRoute('/exec-webhook', function (Request $request) {
+    $worker = new WebHookWorker();
+    $worker->proccesQueue();
+    echo json_encode(['status' => 'processed']);
+});
 
 $appInstance->run();

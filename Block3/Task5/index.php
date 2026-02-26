@@ -1,10 +1,10 @@
 <?php
 
-use Task3\Application\App;
-use Task3\Infrastructure\Request\Request;
-use Task3\Infrastructure\Response\Response;
-use Task3\Application\Model\Task;
-use Task3\Infrastructure\Middleware\BearerToken;
+use Task5\Application\App;
+use Task5\Infrastructure\Request\Request;
+use Task5\Infrastructure\Response\Response;
+use Task5\Application\Model\Task;
+use Task5\Infrastructure\Middleware\BearerToken;
 
 
 require_once __DIR__ . "/vendor/autoload.php";

@@ -1,9 +1,9 @@
 <?php
 
-namespace Task5\Infrastructure\Route;
+namespace Task7\Infrastructure\Route;
 
-use Task5\Domain\Interfaces\Middleware;
-use Task5\Infrastructure\Request\Request;
+use Task7\Domain\Interfaces\Middleware;
+use Task7\Infrastructure\Request\Request;
 
 class Route
 {

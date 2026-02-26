@@ -1,6 +1,6 @@
 <?php
 
-namespace Task1\Domain\Enums;
+namespace Task2\Domain\Enums;
 
 
 enum HttpMethods: string

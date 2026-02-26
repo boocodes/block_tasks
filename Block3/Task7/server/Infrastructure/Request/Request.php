@@ -1,9 +1,9 @@
 <?php
 
-namespace Task5\Infrastructure\Request;
+namespace Task7\Infrastructure\Request;
 
 
-use Task5\Domain\Enums\HttpMethods;
+use Task7\Domain\Enums\HttpMethods;
 
 class Request
 {

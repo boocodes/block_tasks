@@ -1,6 +1,8 @@
 <?php
 
-namespace Task5\Domain\Abstract;
+namespace Task2\Domain\Abstract;
+
+use App\Enums\Task;
 
 abstract class Model
 {
@@ -17,6 +19,8 @@ abstract class Model
                 $normalized[$key] = $value;
             }
         }
+        if(isset($array['id'])) unset($normalized['id']);
+        if(isset($array['createdAt'])) unset($normalized['createdAt']);
         return $normalized;
     }
 
@@ -24,6 +28,12 @@ abstract class Model
     {
         $requiredFields = get_class_vars(get_class($this))['required'] ?? [];
         if (empty($requiredFields)) return true;
+        //delete empty fields
+        foreach ($data as $key => $value) {
+            if (strlen(trim($value)) === 0) {
+                unset($data[$key]);
+            }
+        }
         $inputDataKeys = array_keys($data);
         $result = array_diff($requiredFields, $inputDataKeys);
         if (!empty($result)) {
@@ -36,22 +46,53 @@ abstract class Model
     private function validateInputDataByInstance(array $data): array
     {
         $instanceFields = get_class_vars(get_class($this)) ?? [];
+        $instanceArray = $instanceFields;
         $instanceFields = array_keys($instanceFields);
+
+        $data = array_intersect_key($data, $instanceArray);
+
         if (empty($instanceFields)) return [];
-
-        $result = [];
-
-        foreach ($instanceFields as $instanceKey) {
-            if (!isset($data[$instanceKey])) {
+        foreach ($instanceArray as $instanceKey => $instanceValue) {
+            if ($instanceKey === 'tableName' || $instanceKey === 'id' || $instanceKey === 'createdAt' || $instanceKey === 'required') {
                 continue;
             }
-            $result[$instanceKey] = $data[$instanceKey];
+            if ($instanceValue !== NULL) {
+                if (!isset($data[$instanceKey])) {
+                    $data[$instanceKey] = $instanceValue;
+                    continue;
+                }
+                if ($instanceValue instanceof \BackedEnum) {
+                    $data[$instanceKey] = $instanceValue::tryFrom($data[$instanceKey])->value ?? $instanceValue->value;
+                }
+            }
         }
-        return $result;
+        return $data;
     }
 
-    public function getAll(): array
+    public function getAllWhere(string $hook, string|int $value): array
     {
+        $tableName = get_class_vars(get_class($this))['tableName'] ?? null;
+        if ($tableName === NULL) {
+            var_dump("Table name not defined");
+            return [];
+        }
+        $result = file_get_contents(__DIR__ . '/../../' . $tableName . '.json');
+        if ($result === false) {
+            return [];
+        }
+        $result = json_decode($result, true);
+        $sortedResult = [];
+        foreach ($result as $row) {
+            if ($row[$hook] === $value) {
+                $sortedResult[] = $row;
+            }
+        }
+        return $sortedResult;
+    }
+
+    public function getAll(string|null $limit = null, string|null $cursor = null): array
+    {
+
         $tableName = get_class_vars(get_class($this))['tableName'] ?? null;
         if ($tableName === NULL) {
             var_dump("Table name not defined");
@@ -61,9 +102,56 @@ abstract class Model
         $result = file_get_contents(__DIR__ . '/../../' . $tableName . '.json');
         if ($result === false) {
             return [];
-        } else {
-            return json_decode($result, true);
         }
+
+        if ($limit !== null) {
+            if(!is_numeric($limit)) {
+                $limit = null;
+            }
+            else
+            {
+                $limit = (int)$limit;
+                if ($limit < 1) $limit = 1;
+                if ($limit > 100) $limit = 100;
+            }
+        }
+        $result = json_decode($result, true);
+        if(!is_array($result)) {
+            return [];
+        }
+        $startIndex = 0;
+        $cursorFounded = false;
+        if ($cursor !== null) {
+            foreach ($result as $key => $value) {
+                if (isset($value['id']) && $value['id'] === $cursor) {
+                    $startIndex = $key;
+                    $cursorFounded = true;
+                    break;
+                }
+            }
+            if(!$cursorFounded)
+            {
+                return [];
+            }
+        }
+        $items = array_slice($result, $startIndex, $limit);
+        $nextCursor = null;
+        if(!empty($items) && count($items) === $limit && $startIndex + $limit < count($result))
+        {
+            $nextElem = $result[$startIndex + $limit] ?? null;
+
+            if($nextElem && isset($nextElem['id']))
+            {
+                $nextCursor = $nextElem['id'];
+            }
+        }
+        $response = [
+            'items' => $items,
+        ];
+        if($nextCursor !== null) {
+            $response['nextCursor'] = $nextCursor;
+        }
+        return $response;
     }
 
     public function getById(string $id): array
@@ -74,6 +162,9 @@ abstract class Model
             return [];
         }
         $previousData = json_decode(file_get_contents(__DIR__ . '/../../' . $tableName . '.json'), true);
+        if ($previousData === null) {
+            return [];
+        }
         foreach ($previousData as $row) {
             if ($row['id'] === $id) {
                 return $row;
@@ -89,10 +180,12 @@ abstract class Model
             var_dump("Table name not defined");
             return [];
         }
-        $previousData = json_decode(file_get_contents(__DIR__ . '/../../' . $tableName . '.json'), true);
         if (!$this->checkRequiredData($data)) {
             return [];
         }
+
+        $previousData = json_decode(file_get_contents(__DIR__ . '/../../' . $tableName . '.json'), true);
+
         $result = $this->validateInputDataByInstance($data);
 
 
@@ -100,7 +193,7 @@ abstract class Model
 
         $instanceFields = get_class_vars(get_class($this));
 
-        if(array_key_exists('createdAt', $instanceFields)) {
+        if (array_key_exists('createdAt', $instanceFields)) {
             $result['createdAt'] = new \DateTimeImmutable()->format('c');
         }
 
@@ -126,7 +219,9 @@ abstract class Model
                             unset($idempotencyKeysList[$idempotencyKey]);
                             break;
                         } else {
-                            return [];
+                            header('Content-Type: application/json');
+                            http_response_code(409);
+                            exit(0);
                         }
                     }
                 }
@@ -136,12 +231,10 @@ abstract class Model
             file_put_contents(__DIR__ . '/../../idempotency.json', json_encode($idempotencyKeysList));
         }
 
-
-        if(array_key_exists('id', $instanceFields)) {
+        if (array_key_exists('id', $instanceFields)) {
             $result['id'] = $newResultId;
         }
         $previousData[] = $result;
-        file_put_contents(__DIR__ . '/../../' . 'idempotency.json', json_encode($idempotencyKeysList));
         file_put_contents(__DIR__ . '/../../' . $tableName . '.json', json_encode($previousData, JSON_PRETTY_PRINT));
         return $result;
     }
@@ -155,9 +248,6 @@ abstract class Model
         }
         $previousData = json_decode(file_get_contents(__DIR__ . '/../../' . $tableName . '.json'), true);
 
-//        if (!$this->checkRequiredData($data)) {
-//            return [];
-//        }
         $result = $this->validateInputDataByInstance($data);
         $taskFoundFlag = false;
         foreach ($previousData as &$row) {
@@ -168,7 +258,7 @@ abstract class Model
                 $row['id'] = $idValue;
             }
         }
-        if(!$taskFoundFlag) {
+        if (!$taskFoundFlag) {
             return [];
         }
         unset($row);
@@ -192,7 +282,6 @@ abstract class Model
                 return true;
             }
         }
-        var_dump("Not found");
         return false;
     }
 }

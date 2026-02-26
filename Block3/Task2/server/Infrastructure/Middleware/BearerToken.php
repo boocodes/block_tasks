@@ -1,9 +1,9 @@
 <?php
 
-namespace Task1\Infrastructure\Middleware;
+namespace Task2\Infrastructure\Middleware;
 
-use Task1\Domain\Interfaces\Middleware;
-use Task1\Infrastructure\Request\Request;
+use Task2\Domain\Interfaces\Middleware;
+use Task2\Infrastructure\Request\Request;
 
 
 class BearerToken implements Middleware

@@ -1,6 +1,6 @@
 <?php
 
-namespace Task3\Domain\Abstract;
+namespace Task4\Domain\Abstract;
 
 use App\Enums\Task;
 
