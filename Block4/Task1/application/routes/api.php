@@ -1,10 +1,16 @@
 <?php
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\TaskController;
+use App\Http\Controllers\Task\CreateController;
+use App\Http\Controllers\Task\DeleteController;
+use App\Http\Controllers\Task\GetByIdController;
+use App\Http\Controllers\Task\GetController;
+use App\Http\Controllers\Task\UpdateController;
 
 
-Route::post('/tasks', [TaskController::class, 'create']);
-Route::get('/tasks', [TaskController::class, 'get']);
-Route::get('/tasks/{task}', [TaskController::class, 'getById']);
-Route::patch('/tasks/{task}', [TaskController::class, 'update']);
-Route::delete('/tasks/{task}', [TaskController::class, 'delete']);
+
+Route::get('/tasks', GetController::class)->name('index');
+Route::get('/tasks/{task}', GetByIdController::class)->name('index');
+Route::post('/tasks', CreateController::class)->name('index');
+Route::patch('/tasks/{task}', UpdateController::class)->name('index');
+Route::delete('/tasks/{task}', DeleteController::class)->name('index');
+

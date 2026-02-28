@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('status')->default(Task::NEW->value);
             $table->text('description')->nullable();
             $table->string('title');
+            $table->softDeletes();
         });
     }
 
