@@ -1,9 +1,9 @@
 <?php
 
-namespace Task2\App\Repositories\Interfaces;
+namespace Task3\App\Repositories\Interfaces;
 
-use Task2\App\Models\Task;
-use Task2\App\Http\Requests\Task\GetRequest;
+use Task3\App\Models\Task;
+use Task3\App\Http\Requests\Task\GetRequest;
 
 interface TaskRepositoryInterface
 {

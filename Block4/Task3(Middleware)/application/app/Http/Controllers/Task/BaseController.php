@@ -1,11 +1,11 @@
 <?php
 
-namespace Task2\App\Http\Controllers\Task;
+namespace Task3\App\Http\Controllers\Task;
 
-use Task2\App\Http\Controllers\Controller;
-use Task2\App\Repositories\Interfaces\TaskRepositoryInterface;
-use Task2\App\Repositories\TaskRepository;
-use Task2\App\Services\Task\TaskService;
+use Task3\App\Http\Controllers\Controller;
+use Task3\App\Repositories\Interfaces\TaskRepositoryInterface;
+use Task3\App\Repositories\TaskRepository;
+use Task3\App\Services\Task\TaskService;
 
 
 class BaseController extends Controller

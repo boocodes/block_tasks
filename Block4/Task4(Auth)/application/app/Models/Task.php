@@ -1,12 +1,12 @@
 <?php
 
-namespace Task3\App\Models;
+namespace Task4\App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Task3\App\Enums\TaskStatus;
+use Task4\App\Enums\TaskStatus;
 
 class Task extends Model
 {

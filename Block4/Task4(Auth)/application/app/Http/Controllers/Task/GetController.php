@@ -1,10 +1,10 @@
 <?php
 
-namespace Task3\App\Http\Controllers\Task;
+namespace Task4\App\Http\Controllers\Task;
 
-use Task3\App\Http\Controllers\Controller;
-use Task3\App\Http\Requests\Task\GetRequest;
-use Task3\App\Http\Controllers\Task\BaseController;
+use Task4\App\Http\Controllers\Controller;
+use Task4\App\Http\Requests\Task\GetRequest;
+use Task4\App\Http\Controllers\Task\BaseController;
 
 
 class GetController extends BaseController

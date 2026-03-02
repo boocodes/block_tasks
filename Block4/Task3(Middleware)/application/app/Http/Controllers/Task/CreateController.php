@@ -1,9 +1,9 @@
 <?php
 
-namespace Task2\App\Http\Controllers\Task;
+namespace Task3\App\Http\Controllers\Task;
 
-use Task2\App\Http\Requests\Task\CreateRequest;
-use Task2\App\Http\Resources\Task\TaskResource;
+use Task3\App\Http\Requests\Task\CreateRequest;
+use Task3\App\Http\Resources\Task\TaskResource;
 
 
 

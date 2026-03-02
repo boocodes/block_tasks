@@ -1,8 +1,8 @@
 <?php
 
-namespace Task2\App\Http\Requests\Task;
+namespace Task3\App\Http\Requests\Task;
 
-use Task2\App\Enums\TaskStatus;
+use Task3\App\Enums\TaskStatus;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rules\Enum;
 

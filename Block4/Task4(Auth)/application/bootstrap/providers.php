@@ -1,6 +1,6 @@
 <?php
 
-namespace Task3;
+namespace Task4;
 
 return [
     App\Providers\AppServiceProvider::class,

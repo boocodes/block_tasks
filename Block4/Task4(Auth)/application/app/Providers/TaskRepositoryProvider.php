@@ -1,9 +1,9 @@
 <?php
 
-namespace Task3\App\Providers;
+namespace Task4\App\Providers;
 
-use Task3\App\Repositories\Interfaces\TaskRepositoryInterface;
-use Task3\App\Repositories\TaskRepository;
+use Task4\App\Repositories\Interfaces\TaskRepositoryInterface;
+use Task4\App\Repositories\TaskRepository;
 use Illuminate\Support\ServiceProvider;
 
 class TaskRepositoryProvider extends ServiceProvider

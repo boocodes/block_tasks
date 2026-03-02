@@ -1,8 +1,8 @@
 <?php
 
-namespace Task2\App\Http\Resources\Task;
+namespace Task3\App\Http\Resources\Task;
 
-use Task2\App\Enums\TaskStatus;
+use Task3\App\Enums\TaskStatus;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 

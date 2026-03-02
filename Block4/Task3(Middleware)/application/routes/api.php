@@ -1,10 +1,10 @@
 <?php
 use Illuminate\Support\Facades\Route;
-use Task2\App\Http\Controllers\Task\CreateController;
-use Task2\App\Http\Controllers\Task\DeleteController;
-use Task2\App\Http\Controllers\Task\GetByIdController;
-use Task2\App\Http\Controllers\Task\GetController;
-use Task2\App\Http\Controllers\Task\UpdateController;
+use Task3\App\Http\Controllers\Task\CreateController;
+use Task3\App\Http\Controllers\Task\DeleteController;
+use Task3\App\Http\Controllers\Task\GetByIdController;
+use Task3\App\Http\Controllers\Task\GetController;
+use Task3\App\Http\Controllers\Task\UpdateController;
 
 
 

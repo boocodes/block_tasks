@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Task2\App\Http\Controllers\Task;
+namespace Task3\App\Http\Controllers\Task;
 
 use Illuminate\Http\Request;
 

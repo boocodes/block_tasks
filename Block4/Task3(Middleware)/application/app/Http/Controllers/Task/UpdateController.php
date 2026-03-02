@@ -1,10 +1,10 @@
 <?php
 
-namespace Task2\App\Http\Controllers\Task;
+namespace Task3\App\Http\Controllers\Task;
 
-use Task2\App\Http\Requests\Task\UpdateRequest;
-use Task2\App\Http\Resources\Task\TaskResource;
-use Task2\App\Models\Task;
+use Task3\App\Http\Requests\Task\UpdateRequest;
+use Task3\App\Http\Resources\Task\TaskResource;
+use Task3\App\Models\Task;
 
 class UpdateController extends BaseController
 {

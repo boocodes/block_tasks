@@ -2,7 +2,7 @@
 
 namespace Database\Factories;
 
-use Task2\App\Enums\TaskStatus;
+use Task3\App\Enums\TaskStatus;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**

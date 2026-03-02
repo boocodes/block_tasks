@@ -1,11 +1,11 @@
 <?php
-namespace Task3\App\Repositories;
+namespace Task4\App\Repositories;
 
 use Illuminate\Http\Request;
-use Task3\App\Http\Requests\Task\GetRequest;
-use Task3\App\Http\Resources\Task\TaskResource;
-use Task3\App\Models\Task;
-use Task3\App\Repositories\Interfaces\TaskRepositoryInterface;
+use Task4\App\Http\Requests\Task\GetRequest;
+use Task4\App\Http\Resources\Task\TaskResource;
+use Task4\App\Models\Task;
+use Task4\App\Repositories\Interfaces\TaskRepositoryInterface;
 
 class TaskRepository implements TaskRepositoryInterface
 {

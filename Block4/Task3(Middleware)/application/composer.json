@@ -24,7 +24,7 @@
     },
     "autoload": {
         "psr-4": {
-            "Task2\\App\\": "app/",
+            "Task3\\App\\": "app/",
             "Database\\Factories\\": "database/factories/",
             "Database\\Seeders\\": "database/seeders/"
         }
