@@ -1,17 +1,19 @@
 <?php
-namespace Task2\App\Repositories;
+namespace Task3\App\Repositories;
 
-use Task2\App\Http\Requests\Task\GetRequest;
-use Task2\App\Http\Resources\Task\TaskResource;
-use Task2\App\Models\Task;
-use Task2\App\Repositories\Interfaces\TaskRepositoryInterface;
+use Illuminate\Http\Request;
+use Task3\App\Http\Requests\Task\GetRequest;
+use Task3\App\Http\Resources\Task\TaskResource;
+use Task3\App\Models\Task;
+use Task3\App\Repositories\Interfaces\TaskRepositoryInterface;
 
 class TaskRepository implements TaskRepositoryInterface
 {
 
     public function all(GetRequest $request)
     {
-        $query = new Task()->query();
+        $query = new Task()->query()
+            ->where('user_id', '=', $request->user()->id);
         $limit = $request->input('limit', 10);
         if($request->filled('status')) {
             $query->where('status', $request->status);
@@ -39,11 +41,15 @@ class TaskRepository implements TaskRepositoryInterface
         ], 200);
     }
 
-    public function getById($task)
+    public function getById(Request $request, $task)
     {
         $result = new Task()->find($task);
         if(!$result) {
             return response('', 404);
+        }
+        if($result['user_id'] !== $request->user()->id)
+        {
+            return response('', 403);
         }
         return new TaskResource($result);
     }

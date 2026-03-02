@@ -7,6 +7,7 @@ namespace App\Services\Task;
 use App\Http\Requests\Task\CreateRequest;
 use App\Http\Requests\Task\GetRequest;
 use App\Http\Requests\Task\UpdateRequest;
+use App\Http\Resources\Task\TaskResource;
 use App\Models\Task;
 use Illuminate\Http\Request;
 use Mockery\Exception;
@@ -55,7 +56,7 @@ class TaskService
         $previousCursor = $request->filled('cursor') ? $request->cursor : null;
 
         return response()->json([
-            'data' => $slicedResult,
+            'data' => TaskResource::collection($slicedResult),
             'pagination' => [
                 'next_cursor' => $nextCursor,
                 'prev_cursor' => $previousCursor,
