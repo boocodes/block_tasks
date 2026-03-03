@@ -3,13 +3,8 @@
 namespace Task6\App\Listeners;
 
 use Task6\App\Events\TaskCompletedEvent;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Queue\InteractsWithQueue;
-use Task6\App\Models\Task;
-use Task6\App\Enums\TaskStatus;
 use Task6\App\Models\TaskAudit;
 use Task6\App\Jobs\SendTaskCompletedNotification;
-use Task6\App\Http\Resources\TaskAuditResource;
 
 class WriteTaskAuditLogListener
 {

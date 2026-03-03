@@ -33,7 +33,7 @@ class CreateRequest extends FormRequest
     {
         $tasksStatusValues = "";
         foreach (TaskStatus::cases() as $case) {
-            $tasksStatusValues .= $case->name . ", ";
+            $tasksStatusValues .= $case->value . ", ";
         }
         return [
             'title.required' => 'Title fields is required.',

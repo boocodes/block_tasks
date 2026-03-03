@@ -26,7 +26,6 @@ class AuthController extends BaseController
     }
     public function login(LoginRequest $request): JsonResponse
     {
-
         $data = $request->validated();
         $user = new User()->query()
             ->where('email', $data['email'])

@@ -4,13 +4,10 @@ namespace Task6\App\Jobs;
 
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
-use Task6\App\Events\TaskCompletedEvent;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Support\Facades\Log;
-use Task6\App\Models\TaskAudit;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\Context;
 
 
 class SendTaskCompletedNotification implements ShouldQueue

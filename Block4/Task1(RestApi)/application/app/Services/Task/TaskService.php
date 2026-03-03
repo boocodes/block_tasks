@@ -41,7 +41,7 @@ class TaskService
         $query = new Task()->query();
         $limit = $request->input('limit', 10);
         if($request->filled('status')) {
-            $query->where('status', $request->status);
+            $query->where('status', '=', $request->query()['status']);
         }
         if($request->filled('cursor')) {
             $query->where('id', '>=', $request->cursor);

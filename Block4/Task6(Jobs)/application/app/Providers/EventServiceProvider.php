@@ -2,7 +2,6 @@
 
 namespace Task6\App\Providers;
 
-use Illuminate\Support\ServiceProvider;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as RootProvider;
 use Task6\App\Events\TaskCompletedEvent;
 use Task6\App\Listeners\WriteTaskAuditLogListener;

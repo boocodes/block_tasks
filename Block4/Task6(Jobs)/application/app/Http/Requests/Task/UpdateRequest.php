@@ -34,7 +34,7 @@ class UpdateRequest extends FormRequest
     {
         $tasksStatusValues = "";
         foreach (TaskStatus::cases() as $case) {
-            $tasksStatusValues .= $case->name . ", ";
+            $tasksStatusValues .= $case->value . ", ";
         }
         return [
             'status.in' => 'Status must be on of these: ' . $tasksStatusValues,

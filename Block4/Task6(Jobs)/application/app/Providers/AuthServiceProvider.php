@@ -2,7 +2,6 @@
 
 namespace Task6\App\Providers;
 
-use Illuminate\Support\ServiceProvider;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ProviderRoot;
 
 use Task6\App\Models\Task;
