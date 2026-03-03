@@ -14,7 +14,6 @@ class TaskAudit extends Model
     protected $table = 'task_audits';
     protected $guarded = false;
     protected $casts = [
-        'meta' => 'array',
         'occurred_at' => 'datetime',
     ];
 

@@ -5,7 +5,7 @@ namespace Task6\App\Http\Resources;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class TaskAudit extends JsonResource
+class TaskAuditResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -18,10 +18,10 @@ class TaskAudit extends JsonResource
             'task_id' => $this->taskId,
             'event' => 'completed',
             'occurred_at' => $this->occurredAt,
-            'meta' => [
+            'meta' => json_encode([
                 'author_id' => $this->authorId,
-                'previous_request' => $this->previousRequest
-            ]
+                'previous_status' => $this->previousStatus
+            ])
         ];
     }
 }

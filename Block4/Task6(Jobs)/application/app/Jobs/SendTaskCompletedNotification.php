@@ -5,21 +5,27 @@ namespace Task6\App\Jobs;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Task6\App\Events\TaskCompletedEvent;
-use Task6\App\Models\TaskAudit;
-use Task6\App\Models\Task;
+use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Support\Facades\Log;
+use Task6\App\Models\TaskAudit;
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Context;
+
 
 class SendTaskCompletedNotification implements ShouldQueue
 {
+    use Dispatchable;
     use Queueable;
-
+    use InteractsWithQueue;
+    use SerializesModels;
     /**
      * Create a new job instance.
      */
-    public TaskCompletedEvent $event;
-    public function __construct(TaskCompletedEvent $event)
+    public array $audit;
+    public function __construct(array $audit)
     {
-        $this->event = $event;
+        $this->audit = $audit;
     }
 
     /**
@@ -27,20 +33,9 @@ class SendTaskCompletedNotification implements ShouldQueue
      */
     public function handle(): void
     {
-        $task = $this->event->audit;
-        $previousStatus = $task->getOriginal('status')->value;
-        $auditData = [
-            'task_id' => $task['id'],
-            'event' => 'completed',
-            'occurred_at' => new \DateTimeImmutable()->format('c'),
-            'meta' => [
-                'author' => $task['user_id'],
-                'previous_status' => $previousStatus,
-            ]
-        ];
-        $result = TaskAudit::create($auditData);
-        if(!$result) {return;}
-
-        Log::info('Audit created, id - ', $result->id . ', occurred at - ' . $result->occurred_at);
+        Log::info('Task audit created', [
+            'audit_id' => $this->audit['id'],
+            'occurred_at' => $this->audit['occurred_at'],
+        ]);
     }
 }

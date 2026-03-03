@@ -1,8 +1,7 @@
 <?php
 
-namespace Task4;
-
 return [
-    App\Providers\AppServiceProvider::class,
-    App\Providers\TaskRepositoryProvider::class,
+    Task4\App\Providers\AppServiceProvider::class,
+    Task4\App\Providers\AuthServiceProvider::class,
+    Task4\App\Providers\TaskRepositoryProvider::class,
 ];

@@ -1,4 +1,5 @@
 <?php
+
 namespace Task4\App\Repositories;
 
 use Illuminate\Http\Request;
@@ -15,10 +16,10 @@ class TaskRepository implements TaskRepositoryInterface
         $query = new Task()->query()
             ->where('user_id', '=', $request->user()->id);
         $limit = $request->input('limit', 10);
-        if($request->filled('status')) {
+        if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
-        if($request->filled('cursor')) {
+        if ($request->filled('cursor')) {
             $query->where('id', '>=', $request->cursor);
         }
 
@@ -44,12 +45,8 @@ class TaskRepository implements TaskRepositoryInterface
     public function getById(Request $request, $task)
     {
         $result = new Task()->find($task);
-        if(!$result) {
+        if (!$result) {
             return response('', 404);
-        }
-        if($result['user_id'] !== $request->user()->id)
-        {
-            return response('', 403);
         }
         return new TaskResource($result);
     }

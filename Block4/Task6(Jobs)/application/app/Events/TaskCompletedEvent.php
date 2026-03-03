@@ -2,6 +2,7 @@
 
 namespace Task6\App\Events;
 
+use Task6\App\Enums\TaskStatus;
 use Task6\App\Http\Requests\Task\CreateRequest;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
@@ -20,10 +21,12 @@ class TaskCompletedEvent
     /**
      * Create a new event instance.
      */
-    public Task $audit;
-    public function __construct(Task $audit)
+    public TaskStatus $previousStatus;
+    public Task $task;
+    public function __construct(Task $task, TaskStatus $previousStatus)
     {
-        $this->audit = $audit;
+        $this->task = $task;
+        $this->previousStatus = $previousStatus;
     }
 
     /**

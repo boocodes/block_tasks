@@ -11,6 +11,6 @@ class CreateController extends BaseController
 {
     public function __invoke(CreateRequest $request)
     {
-        return new TaskResource($this->service->create($request));
+        return $this->service->create($request);
     }
 }

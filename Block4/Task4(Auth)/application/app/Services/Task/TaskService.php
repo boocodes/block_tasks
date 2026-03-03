@@ -18,23 +18,27 @@ class TaskService
             $data['status'] = TaskStatus::NEW->value;
         }
         $data['user_id'] = $request->user()->id;
-        return Task::create($data);
+        if(new Task()->create($data))
+        {
+            return response('', 201);
+        }
+        return response('', 500);
     }
-    public function update(array $data, Task $task)
+    public function update(array $data, $task)
     {
-        $task->update($data);
-        return $task;
+        $task = new Task()->find($task);
+        if(!$task){
+            return response('', 404);
+        }
+        if($task->update($data))
+        {
+            return response('', 200);
+        }
+        return response('', 500);
     }
     public function delete(Request $request, $task)
     {
         $task = Task::find($task);
-        if(!$task){
-            return response('', 404);
-        }
-        if($task['user_id'] !== $request->user()->id)
-        {
-            return response('', 403);
-        }
         $task->delete();
         return response('', 204);
     }

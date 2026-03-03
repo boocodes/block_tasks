@@ -1,8 +1,8 @@
 <?php
 
-namespace Task6;
-
 return [
-    App\Providers\AppServiceProvider::class,
-    App\Providers\TaskRepositoryProvider::class,
+    Task6\App\Providers\AppServiceProvider::class,
+    Task6\App\Providers\AuthServiceProvider::class,
+    Task6\App\Providers\EventServiceProvider::class,
+    Task6\App\Providers\TaskRepositoryProvider::class,
 ];

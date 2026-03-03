@@ -20,7 +20,7 @@ class TaskAudit extends JsonResource
             'occurred_at' => $this->occurredAt,
             'meta' => [
                 'author_id' => $this->authorId,
-                'previous_request' => $this->previousRequest
+                'previous_status' => $this->previousStatus
             ]
         ];
     }

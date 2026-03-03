@@ -10,14 +10,7 @@ class UpdateController extends BaseController
 {
     public function __invoke(UpdateRequest $request, $task)
     {
-        $task = new Task()->find($task);
-        if($task['user_id'] !== $request->user()->id)
-        {
-            return response('', 403);
-        }
-        if(!$task){
-            return response('', 404);
-        }
-        return new TaskResource($this->service->update($request->validated(), $task));
+        $this->authorize('update', new Task()->find($task));
+        return $this->service->update($request->validated(), $task);
     }
 }

@@ -14,6 +14,10 @@ class UpdateController extends BaseController
         if(!$task){
             return response('', 404);
         }
-        return new TaskResource($this->service->update($request->validated(), $task));
+        if($this->service->update($request->validated(), $task))
+        {
+            return response('', 200);
+        }
+        return response('', 500);
     }
 }

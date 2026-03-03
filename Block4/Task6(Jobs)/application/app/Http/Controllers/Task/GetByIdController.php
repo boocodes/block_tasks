@@ -11,6 +11,7 @@ class GetByIdController extends BaseController
 {
     public function __invoke(Request $request, $task)
     {
+        $this->authorize('view', new Task()->find($task));
         return $this->taskRepository->getById($request, $task);
     }
 }

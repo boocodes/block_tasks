@@ -6,6 +6,7 @@ use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Facades\Context;
+use Illuminate\Support\Str;
 
 class RequestIdMiddleware
 {
@@ -16,10 +17,10 @@ class RequestIdMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
-        $id = $request->header('X-Request-Id') ?? uniqid();
+        $id = $request->header('X-Request-Id') ?? (string)str()->uuid();
+        Context::add('requestId', $id);
         $response = $next($request);
         $response->headers->set('X-Request-Id', $id);
-        Context::add('requestId', $id);
         return $response;
     }
 }
