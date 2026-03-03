@@ -4,7 +4,9 @@ namespace Task5\App\Services\Task;
 
 
 
+use Task5\App\Events\TaskCompletedEvent;
 use Task5\App\Http\Requests\Task\CreateRequest;
+use Task5\App\Http\Requests\Task\UpdateRequest;
 use Task5\App\Models\Task;
 use Illuminate\Http\Request;
 use Task5\App\Enums\TaskStatus;
@@ -20,9 +22,12 @@ class TaskService
         $data['user_id'] = $request->user()->id;
         return Task::create($data);
     }
-    public function update(array $data, Task $task)
+    public function update(UpdateRequest $request, Task $task)
     {
-        $task->update($data);
+        $task->update($request->validated());
+        if($task['status']->value == TaskStatus::DONE->value){
+            TaskCompletedEvent::dispatch($task);
+        }
         return $task;
     }
     public function delete(Request $request, $task)
