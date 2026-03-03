@@ -33,9 +33,6 @@ class SendTaskCompletedNotification implements ShouldQueue
      */
     public function handle(): void
     {
-        Log::info('Task audit created', [
-            'audit_id' => $this->audit['id'],
-            'occurred_at' => $this->audit['occurred_at'],
-        ]);
+        Log::info('Task audit created. Id: {id}, occurred at: {occurred_at}', ['id' => $this->audit['id'], 'occurred_at' => $this->audit['occurred_at']]);
     }
 }
