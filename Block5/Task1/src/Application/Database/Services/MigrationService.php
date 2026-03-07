@@ -100,7 +100,7 @@ class MigrationService
             return;
         }
         CLHelper::send("Already migrate list:", TextColorsEnum::GREEN);
-        CLHelper::send("Bach - migration: created_at:", TextColorsEnum::YELLOW);
+        CLHelper::send("Batch - migration: created_at:", TextColorsEnum::YELLOW);
         foreach ($alreadyMigrated as $key) {
             CLHelper::send($key['batch'] . " - " . $key['migration'] . ": " . $key['created_at'], TextColorsEnum::YELLOW);
         }
@@ -118,6 +118,10 @@ class MigrationService
         CLHelper::send("Run single and specified migration file. You will be asked to enter migration file name with file format or without", TextColorsEnum::YELLOW);
         CLHelper::send("migrate:list", TextColorsEnum::WHITE, BackgroundColorsEnum::CYAN);
         CLHelper::send("Display all already migrated files from migration database table", TextColorsEnum::YELLOW);
+        CLHelper::send("migrate:next", TextColorsEnum::WHITE, BackgroundColorsEnum::CYAN);
+        CLHelper::send("Display all next batch migrations", TextColorsEnum::YELLOW);
+        CLHelper::send("Additional info: ", TextColorsEnum::YELLOW);
+        CLHelper::send("\t- Migration files must be named like own database tables!", TextColorsEnum::YELLOW);
     }
 
     private function applyMigrationsFromSQL(array $migrationsArray): void
@@ -156,11 +160,26 @@ class MigrationService
             $refColumn = trim($match[3]);
             $fkName = "fk_{$sqlFileName}_{$column}";
             $alterSQL = "ALTER TABLE {$sqlFileName} ADD CONSTRAINT {$fkName} FOREIGN KEY ({$column}) REFERENCES {$refTable} ({$refColumn})";
-            CLHelper::send($alterSQL, TextColorsEnum::RED);
             $alterStatement[] = $alterSQL;
         }
 
         return $alterStatement;
+    }
+    public function displayNextBatch(): void
+    {
+        $localMigrationsFromDisk = $this->formatSQLmigrationFiles();
+        $alreadyMigrated = $this->getAlreadyMigratedMigrations();
+        $nextMigration = array_diff($localMigrationsFromDisk, $alreadyMigrated);
+        if(empty($nextMigration)) {
+            CLHelper::send("All migrations from database/migrations were been migrated. Nothing new", TextColorsEnum::GREEN);
+            return;
+        }
+        CLHelper::send("At next migration will be migrated next files: ", TextColorsEnum::YELLOW);
+        CLHelper::send("Next batch: " . $this->highestBatchValue + 1, TextColorsEnum::YELLOW);
+        foreach($nextMigration as $migrationFile) {
+            CLHelper::send("Migration file: " . $migrationFile, TextColorsEnum::YELLOW);
+        }
+        CLHelper::send("Total: " . count($nextMigration), TextColorsEnum::GREEN);
     }
 
     private function removeForeignKey(string $sqlQuery): string

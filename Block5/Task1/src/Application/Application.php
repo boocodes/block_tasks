@@ -38,6 +38,9 @@ class Application{
                 case 'migrate:specified':
                     $this->migrationService->migrateSpecific(CLHelper::get("Input migration filename: "));
                     return;
+                case 'migrate:next':
+                    $this->migrationService->displayNextBatch();
+                    return;
                 case 'migrate:list':
                     $this->migrationService->getMigrateListAndDisplay();
                     return;
