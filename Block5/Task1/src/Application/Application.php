@@ -20,28 +20,27 @@ class Application{
         $this->argv = $_SERVER['argv'];
     }
     public function boot(): void{
+        if(count($this->argv) <= 1)
+        {
+            $this->migrationService->getHelpInfoCLI();
+        }
         foreach ($this->argv as $argv){
             switch ($argv){
                 case '--help':
                     $this->migrationService->getHelpInfoCLI();
-                    break;
+                    return;
                 case 'migrate':
                     $this->migrationService->migrate();
-                    break;
+                    return;
                 case 'migrate:rollback':
                     $this->migrationService->migrateRollback();
-                    break;
+                    return;
                 case 'migrate:specified':
                     $this->migrationService->migrateSpecific(CLHelper::get("Input migration filename: "));
-                    break;
+                    return;
                 case 'migrate:list':
                     $this->migrationService->getMigrateListAndDisplay();
-                    break;
-                case '--seed':
-                    var_dump("with seeds");
-                    break;
-                    case '--help':
-
+                    return;
             }
         }
     }
