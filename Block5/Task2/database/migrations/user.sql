@@ -1,0 +1,7 @@
+CREATE TABLE IF NOT EXISTS user
+(
+    id         INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    email      varchar(255) NOT NULL UNIQUE,
+    name       varchar(100),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
