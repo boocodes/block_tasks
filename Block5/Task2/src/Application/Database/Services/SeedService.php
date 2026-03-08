@@ -37,6 +37,7 @@ class SeedService
             }
         }
         $this->connection->exec("SET FOREIGN_KEY_CHECKS=1;");
+        CLHelper::send("Seeding completed", TextColorsEnum::GREEN);
     }
 
 

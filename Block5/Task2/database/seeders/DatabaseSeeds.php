@@ -53,7 +53,8 @@ class DatabaseSeeds implements Seedable
                             return random_int(1, 10);
                         },
                         'status' => function () {
-                            return RandomValues::getRandomValueFromEnum(PaymentStatusEmum::class);
+                            $data = [PaymentStatusEmum::PAID->value, PaymentStatusEmum::PAID->value, PaymentStatusEmum::PAID->value, PaymentStatusEmum::FAILED->value, PaymentStatusEmum::PENDING];
+                            return array_rand(array_values($data));
                         },
 
                         'provider' => function () {
@@ -93,7 +94,8 @@ class DatabaseSeeds implements Seedable
                             'references' => 'user'
                         ],
                         'status' => function () {
-                            return RandomValues::getRandomValueFromEnum(OrderStatusEnum::class);
+                            $data = [OrderStatusEnum::PAID->value, OrderStatusEnum::PAID->value, OrderStatusEnum::PAID->value, OrderStatusEnum::NEW->value, OrderStatusEnum::CANCELLED->value];
+                            return array_rand(array_values($data));
                         },
                         'total_amount' => function () {
                             return random_int(10, 99999);
