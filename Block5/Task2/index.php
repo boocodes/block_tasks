@@ -20,16 +20,4 @@ $application = new Application($connectionService, $migrationService, $seedingSe
 $application->boot();
 
 
-//
-//
-//exit(0);
-//$total = 100;
-//for ($i = 1; $i <= $total; $i++) {
-//    CLHelper::progressBar($i, $total);
-//    //usleep(100000);
-//}
-
-
-
-
 // php index.php --help for detail info

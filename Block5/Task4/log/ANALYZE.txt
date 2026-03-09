@@ -1,0 +1,141 @@
+Before indices:
+- q1_top_users.sql:
+    array(1) {
+      [0]=>
+      array(1) {
+        ["EXPLAIN"]=>
+        string(536) "-> Limit: 20 row(s)  (cost=7852.64 rows=20) (actual time=110.712..110.718 rows=20 loops=1)
+        -> Sort: orders.total_amount DESC, limit input to 20 row(s) per chunk  (cost=7852.64 rows=100035) (actual time=110.709..110.713 rows=20 loops=1)
+            -> Filter: ((orders.`status` = 'paid') and (orders.created_at >= <cache>((now() - interval 30 day))))  (cost=7852.64 rows=100035) (actual time=0.301..110.390 rows=267 loops=1)
+                -> Table scan on orders  (cost=7852.64 rows=100035) (actual time=0.102..76.180 rows=100000 loops=1)
+    "
+      }
+    }
+- q2_products_sales.sql:
+array(1) {
+  [0]=>
+  array(1) {
+    ["EXPLAIN"]=>
+    string(998) "-> Limit: 50 row(s)  (actual time=814.623..814.638 rows=50 loops=1)
+    -> Sort: total_qty DESC, limit input to 50 row(s) per chunk  (actual time=814.621..814.626 rows=50 loops=1)
+        -> Table scan on <temporary>  (actual time=799.453..805.904 rows=19603 loops=1)
+            -> Aggregate using temporary table  (actual time=799.451..799.451 rows=19603 loops=1)
+                -> Nested loop inner join  (cost=19117.07 rows=25832) (actual time=0.153..670.593 rows=79758 loops=1)
+                    -> Filter: ((orders.created_at >= TIMESTAMP'2021-09-16 13:00:00') and (orders.created_at <= TIMESTAMP'2025-09-16 18:00:00'))  (cost=10075.75 rows=11113) (actual time=0.096..114.683 rows=39980 loops=1)
+                        -> Table scan on orders  (cost=10075.75 rows=100035) (actual time=0.088..65.804 rows=100000 loops=1)
+                    -> Index lookup on order_items using fk_order_items_order_id (order_id=orders.id)  (cost=0.58 rows=2) (actual time=0.011..0.013 rows=2 loops=39980)
+"
+  }
+}
+- q3_orders_with_items.sql:
+array(1) {
+  [0]=>
+  array(1) {
+    ["EXPLAIN"]=>
+    string(740) "-> Limit: 100 row(s)  (cost=28415.50 rows=100) (actual time=118.718..119.133 rows=100 loops=1)
+    -> Nested loop left join  (cost=28415.50 rows=100035) (actual time=118.716..119.116 rows=100 loops=1)
+        -> Sort: orders.created_at DESC, limit input to 100 row(s) per chunk  (cost=10075.75 rows=100035) (actual time=118.682..118.701 rows=100 loops=1)
+            -> Filter: (orders.`status` = 'paid')  (cost=10075.75 rows=100035) (actual time=0.099..103.791 rows=33149 loops=1)
+                -> Table scan on orders  (cost=10075.75 rows=100035) (actual time=0.090..76.041 rows=100000 loops=1)
+        -> Single-row index lookup on user using PRIMARY (id=orders.user_id)  (cost=0.25 rows=1) (actual time=0.004..0.004 rows=1 loops=100)
+"
+  }
+}
+- q4_conversion.sql:
+array(1) {
+  [0]=>
+  array(1) {
+    ["EXPLAIN"]=>
+    string(450) "-> Aggregate: count(orders.user_id)  (cost=10446.18 rows=1) (actual time=103.562..103.563 rows=1 loops=1)
+    -> Filter: ((orders.`status` = 'paid') and (orders.created_at >= TIMESTAMP'2021-09-16 13:00:00') and (orders.created_at <= TIMESTAMP'2025-09-16 18:00:00'))  (cost=10075.75 rows=3704) (actual time=0.078..102.243 rows=13140 loops=1)
+        -> Table scan on orders  (cost=10075.75 rows=100035) (actual time=0.065..64.862 rows=100000 loops=1)
+"
+  }
+}
+- q5_suspicious.sql:
+array(1) {
+  [0]=>
+  array(1) {
+    ["EXPLAIN"]=>
+    string(1062) "-> Filter: (count(0) > 3)  (actual time=327.030..327.035 rows=10 loops=1)
+    -> Table scan on <temporary>  (actual time=327.026..327.029 rows=10 loops=1)
+        -> Aggregate using temporary table  (actual time=327.023..327.023 rows=10 loops=1)
+            -> Nested loop left join  (cost=33427.25 rows=33371) (actual time=0.142..302.179 rows=33325 loops=1)
+                -> Nested loop inner join  (cost=21747.40 rows=33371) (actual time=0.130..212.844 rows=33325 loops=1)
+                    -> Filter: (payments.`status` = 'failed')  (cost=10067.55 rows=33371) (actual time=0.105..116.339 rows=33325 loops=1)
+                        -> Table scan on payments  (cost=10067.55 rows=100113) (actual time=0.096..78.571 rows=100000 loops=1)
+                    -> Single-row index lookup on orders using PRIMARY (id=payments.order_id)  (cost=0.25 rows=1) (actual time=0.002..0.002 rows=1 loops=33325)
+                -> Single-row covering index lookup on user using PRIMARY (id=orders.user_id)  (cost=0.25 rows=1) (actual time=0.002..0.002 rows=1 loops=33325)
+"
+  }
+}
+
+After indices:
+- q1_top_users.sql:
+array(1) {
+  [0]=>
+  array(1) {
+    ["EXPLAIN"]=>
+    string(605) "-> Limit: 20 row(s)  (cost=348.56 rows=20) (actual time=6.740..6.748 rows=20 loops=1)
+    -> Sort: orders.total_amount DESC, limit input to 20 row(s) per chunk  (cost=348.56 rows=774) (actual time=6.738..6.743 rows=20 loops=1)
+        -> Filter: (orders.`status` = 'paid')  (cost=348.56 rows=774) (actual time=0.136..6.518 rows=267 loops=1)
+            -> Index range scan on orders using orders_created_at_index over ('2026-02-07 11:31:36' <= created_at), with index condition: (orders.created_at >= <cache>((now() - interval 30 day)))  (cost=348.56 rows=774) (actual time=0.091..6.241 rows=774 loops=1)
+"
+  }
+}
+- q2_products_sales.sql:
+array(1) {
+  [0]=>
+  array(1) {
+    ["EXPLAIN"]=>
+    string(1112) "-> Limit: 50 row(s)  (actual time=927.643..927.657 rows=50 loops=1)
+    -> Sort: total_qty DESC, limit input to 50 row(s) per chunk  (actual time=927.641..927.647 rows=50 loops=1)
+        -> Table scan on <temporary>  (actual time=914.390..919.794 rows=19603 loops=1)
+            -> Aggregate using temporary table  (actual time=914.387..914.387 rows=19603 loops=1)
+                -> Nested loop inner join  (cost=50394.26 rows=115243) (actual time=0.113..765.853 rows=79758 loops=1)
+                    -> Filter: ((orders.created_at >= TIMESTAMP'2021-09-16 13:00:00') and (orders.created_at <= TIMESTAMP'2025-09-16 18:00:00'))  (cost=10059.31 rows=50017) (actual time=0.060..74.035 rows=39980 loops=1)
+                        -> Covering index range scan on orders using orders_created_at_index over ('2021-09-16 13:00:00' <= created_at <= '2025-09-16 18:00:00')  (cost=10059.31 rows=50017) (actual time=0.052..42.732 rows=39980 loops=1)
+                    -> Index lookup on order_items using order_items_order_id_index (order_id=orders.id)  (cost=0.58 rows=2) (actual time=0.014..0.017 rows=2 loops=39980)
+"
+  }
+}
+- q3_orders_with_items.sql:
+array(1) {
+  [0]=>
+  array(1) {
+    ["EXPLAIN"]=>
+    string(585) "-> Limit: 100 row(s)  (cost=12514.70 rows=100) (actual time=0.355..1.481 rows=100 loops=1)
+    -> Nested loop left join  (cost=12514.70 rows=100) (actual time=0.354..1.464 rows=100 loops=1)
+        -> Filter: (orders.`status` = 'paid')  (cost=0.45 rows=100) (actual time=0.340..1.112 rows=100 loops=1)
+            -> Index scan on orders using orders_created_at_index (reverse)  (cost=0.45 rows=200) (actual time=0.337..1.024 rows=299 loops=1)
+        -> Single-row index lookup on user using PRIMARY (id=orders.user_id)  (cost=0.25 rows=1) (actual time=0.003..0.003 rows=1 loops=100)
+"
+  }
+}
+- q4_conversion.sql:
+array(1) {
+  [0]=>
+  array(1) {
+    ["EXPLAIN"]=>
+    string(510) "-> Aggregate: count(orders.user_id)  (cost=5218.40 rows=1) (actual time=148.746..148.747 rows=1 loops=1)
+    -> Filter: ((orders.created_at >= TIMESTAMP'2021-09-16 13:00:00') and (orders.created_at <= TIMESTAMP'2025-09-16 18:00:00'))  (cost=2717.57 rows=25008) (actual time=0.535..147.063 rows=13140 loops=1)
+        -> Index lookup on orders using orders_status_index (status='paid'), with index condition: (orders.`status` = 'paid')  (cost=2717.57 rows=50017) (actual time=0.523..130.295 rows=33149 loops=1)
+"
+  }
+}
+- q5_suspicious.sql:
+array(1) {
+  [0]=>
+  array(1) {
+    ["EXPLAIN"]=>
+    string(1020) "-> Filter: (count(0) > 3)  (actual time=290.745..290.750 rows=10 loops=1)
+    -> Table scan on <temporary>  (actual time=290.741..290.744 rows=10 loops=1)
+        -> Aggregate using temporary table  (actual time=290.739..290.739 rows=10 loops=1)
+            -> Nested loop left join  (cost=40213.55 rows=50056) (actual time=0.385..270.312 rows=33325 loops=1)
+                -> Nested loop inner join  (cost=22693.95 rows=50056) (actual time=0.378..192.247 rows=33325 loops=1)
+                    -> Index lookup on payments using payments_status_index (status='failed'), with index condition: (payments.`status` = 'failed')  (cost=5174.35 rows=50056) (actual time=0.367..111.031 rows=33325 loops=1)
+                    -> Single-row index lookup on orders using PRIMARY (id=payments.order_id)  (cost=0.25 rows=1) (actual time=0.002..0.002 rows=1 loops=33325)
+                -> Single-row covering index lookup on user using PRIMARY (id=orders.user_id)  (cost=0.25 rows=1) (actual time=0.002..0.002 rows=1 loops=33325)
+"
+  }
+}

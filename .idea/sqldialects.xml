@@ -7,5 +7,34 @@
     <file url="file://$PROJECT_DIR$/Block5/Task2/database/migrations/payments.sql" dialect="GenericSQL" />
     <file url="file://$PROJECT_DIR$/Block5/Task2/database/migrations/products.sql" dialect="GenericSQL" />
     <file url="file://$PROJECT_DIR$/Block5/Task2/database/migrations/user.sql" dialect="GenericSQL" />
+    <file url="file://$PROJECT_DIR$/Block5/Task3/database/migrations/audit_log.sql" dialect="GenericSQL" />
+    <file url="file://$PROJECT_DIR$/Block5/Task3/database/migrations/order_items.sql" dialect="GenericSQL" />
+    <file url="file://$PROJECT_DIR$/Block5/Task3/database/migrations/orders.sql" dialect="GenericSQL" />
+    <file url="file://$PROJECT_DIR$/Block5/Task3/database/migrations/payments.sql" dialect="GenericSQL" />
+    <file url="file://$PROJECT_DIR$/Block5/Task3/database/migrations/products.sql" dialect="GenericSQL" />
+    <file url="file://$PROJECT_DIR$/Block5/Task3/database/migrations/user.sql" dialect="GenericSQL" />
+    <file url="file://$PROJECT_DIR$/Block5/Task4/database/migrations/audit_log.sql" dialect="GenericSQL" />
+    <file url="file://$PROJECT_DIR$/Block5/Task4/database/migrations/order_items.sql" dialect="GenericSQL" />
+    <file url="file://$PROJECT_DIR$/Block5/Task4/database/migrations/orders.sql" dialect="GenericSQL" />
+    <file url="file://$PROJECT_DIR$/Block5/Task4/database/migrations/payments.sql" dialect="GenericSQL" />
+    <file url="file://$PROJECT_DIR$/Block5/Task4/database/migrations/products.sql" dialect="GenericSQL" />
+    <file url="file://$PROJECT_DIR$/Block5/Task4/database/migrations/user.sql" dialect="GenericSQL" />
+    <file url="file://$PROJECT_DIR$/Block5/Task4/database/queries/q1_top_users.sql" dialect="GenericSQL" />
+    <file url="file://$PROJECT_DIR$/Block5/Task4/database/queries/q2_products_sales.sql" dialect="GenericSQL" />
+    <file url="file://$PROJECT_DIR$/Block5/Task4/database/queries/q3_orders_with_items.sql" dialect="GenericSQL" />
+    <file url="file://$PROJECT_DIR$/Block5/Task4/database/queries/q4_conversion.sql" dialect="GenericSQL" />
+    <file url="file://$PROJECT_DIR$/Block5/Task4/database/queries/q5_suspicious.sql" dialect="GenericSQL" />
+    <file url="file://$PROJECT_DIR$/Block5/Task5/database/migrations/audit_log.sql" dialect="GenericSQL" />
+    <file url="file://$PROJECT_DIR$/Block5/Task5/database/migrations/indices.sql" dialect="GenericSQL" />
+    <file url="file://$PROJECT_DIR$/Block5/Task5/database/migrations/order_items.sql" dialect="GenericSQL" />
+    <file url="file://$PROJECT_DIR$/Block5/Task5/database/migrations/orders.sql" dialect="GenericSQL" />
+    <file url="file://$PROJECT_DIR$/Block5/Task5/database/migrations/payments.sql" dialect="GenericSQL" />
+    <file url="file://$PROJECT_DIR$/Block5/Task5/database/migrations/products.sql" dialect="GenericSQL" />
+    <file url="file://$PROJECT_DIR$/Block5/Task5/database/migrations/user.sql" dialect="GenericSQL" />
+    <file url="file://$PROJECT_DIR$/Block5/Task5/database/queries/q1_top_users.sql" dialect="GenericSQL" />
+    <file url="file://$PROJECT_DIR$/Block5/Task5/database/queries/q2_products_sales.sql" dialect="GenericSQL" />
+    <file url="file://$PROJECT_DIR$/Block5/Task5/database/queries/q3_orders_with_items.sql" dialect="GenericSQL" />
+    <file url="file://$PROJECT_DIR$/Block5/Task5/database/queries/q4_conversion.sql" dialect="GenericSQL" />
+    <file url="file://$PROJECT_DIR$/Block5/Task5/database/queries/q5_suspicious.sql" dialect="GenericSQL" />
   </component>
 </project>
