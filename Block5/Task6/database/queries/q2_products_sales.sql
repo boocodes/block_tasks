@@ -1,3 +1,4 @@
+EXPLAIN ANALYZE
 SELECT order_items.product_id, SUM(order_items.qty) as total_qty
 FROM order_items
          INNER JOIN orders ON orders.id = order_items.order_id

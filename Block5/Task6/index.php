@@ -53,13 +53,20 @@ foreach ([1, 500, 2000] as $page) {
 
 $idForKeyset = [];
 $keysetLastId = null;
-
+CLHelper::send("Start collecting keyset pagination hooks data. Simulating cache data for keyset pagination", TextColorsEnum::GREEN);
+$start = microtime(true);
 for ($i = 1; $i < 2000; $i++) {
     $result = $orm->keysetPagination('keyset_select.sql', $userId, $limit, $keysetLastId);
-    if (empty($result['data'])) break;
+    if (empty($result['data']))
+    {
+        CLHelper::send("Keyset collecting stopped at " . $i . " page", TextColorsEnum::RED);
+        break;
+    }
     $idForKeyset[$i] = $result['lastId'];
     $keysetLastId = $result['lastId'];
 }
+$end = microtime(true);
+CLHelper::send("Collecting data time: " . ($end - $start) * 1000,  TextColorsEnum::GREEN);
 
 
 CLHelper::send("Keyset: ", TextColorsEnum::RED);
@@ -78,6 +85,25 @@ foreach ([499, 1999] as $page) {
     CLHelper::send("Time: " . ($end - $start) * 1000 . ". Page " . $page, TextColorsEnum::GREEN);
 }
 
+
+/*
+PS C:\Users\java2\Documents\effective_study\Block5\Task6> php index.php
+Offset:
+Time: 1.2180805206299. Page 1
+Time: 1.6698837280273. Page 500
+Time: 3.1960010528564. Page 2000
+Start collecting keyset pagination hooks data. Simulating cache data for keyset pagination
+                                                                         Keyset collecting stopped at 1001 page
+Collecting data time: 472.08213806152
+Keyset:
+Time: 0.60606002807617. Page 1
+Time: 0.52380561828613. Page 499
+PS C:\Users\java2\Documents\effective_study\Block5\Task6>
+
+Получается, что оффсет быстрый при непосредственном поиске в любом направлении
+Кейсет нужен, чтобы перепрыгивать последовательно, но медленный если надо перейти на определенную страницу
+
+*/
 
 
 //race_test($connectionService->getDatabase(), 3, 10);
