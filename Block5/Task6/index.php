@@ -8,6 +8,7 @@ use StorageTask6\Application\Database\Services\MigrationService;
 use StorageTask6\Application\Utils\CLHelper;
 use StorageTask6\Application\Database\Services\SeedService;
 use Database6\seeders\DatabaseSeeds;
+use StorageTask6\Domain\Enums\TextColorsEnum;
 use StorageTask6\Application\ORM\ORM;
 use function Database6\bin\race_test;
 
@@ -25,28 +26,56 @@ $application = new Application($connectionService, $migrationService, $seedingSe
 
 $orm = new ORM($connectionService->getConnection());
 
-$query1 = $orm->selectQuery('q1_top_users.sql');
-$query2 = $orm->selectQuery('q2_products_sales.sql', [':date_from' => '2021-09-16 13:00:00', ':date_to' => '2025-09-16 18:00:00']);
-$query3 = $orm->selectQuery('q3_orders_with_items.sql');
-$query4 = $orm->selectQuery('q4_conversion.sql', [':date_from' => '2021-09-16 13:00:00', ':date_to' => '2025-09-16 18:00:00']);
-$query5 = $orm->selectQuery('q5_suspicious.sql');
+//$query1 = $orm->selectQuery('q1_top_users.sql');
+//$query2 = $orm->selectQuery('q2_products_sales.sql', [':date_from' => '2021-09-16 13:00:00', ':date_to' => '2025-09-16 18:00:00']);
+//$query3 = $orm->selectQuery('q3_orders_with_items.sql');
+//$query4 = $orm->selectQuery('q4_conversion.sql', [':date_from' => '2021-09-16 13:00:00', ':date_to' => '2025-09-16 18:00:00']);
+//$query5 = $orm->selectQuery('q5_suspicious.sql');
 //var_dump($query1);
 
 
+$userWithMaxOrdersCountQuery = $connectionService->getConnection()->query("SELECT user_id, COUNT(*) as count_orders FROM orders GROUP BY user_id ORDER BY count_orders DESC LIMIT 1");
+$userWithMaxOrdersCountValue = $userWithMaxOrdersCountQuery->fetch(PDO::FETCH_ASSOC);
+$userId = $userWithMaxOrdersCountValue['user_id'];
+$ordersCount = $userWithMaxOrdersCountValue['count_orders'];
 
-$offsetQuery1 = $orm->offsetPagination('offset_select.sql', 25591, 10, 1);
-$offsetQuery2 = $orm->offsetPagination('offset_select.sql', 25591, 10, 500);
-$offsetQuery3 = $orm->offsetPagination('offset_select.sql', 25591, 10, 2000);
 
-var_dump($offsetQuery1);
+$limit = 10;
+$totalPage = ceil($ordersCount / $limit);
 
-exit(0);
-$keysetQuery1 = $orm->keysetPagination('keyset_select.sql', 25591, 10);
-$resultData = $keysetQuery1;
-var_dump($resultData['data']);
-while(!empty($resultData) && count($resultData['data']) > 0 && $resultData['lastId'] !== null) {
-    $nextKeysetQuery = $orm->keysetPagination('keyset_select.sql', 25591, 10, $resultData['lastId']);
-    $resultData = $nextKeysetQuery;
+CLHelper::send("Offset: ", TextColorsEnum::RED);
+foreach ([1, 500, 2000] as $page) {
+    $start = microtime(true);
+    $orm->offsetPagination('offset_select.sql', $userId, $limit, $page);
+    $end = microtime(true);
+    CLHelper::send("Time: " . ($end - $start) * 1000 . ". Page " . $page, TextColorsEnum::GREEN);
+}
+
+$idForKeyset = [];
+$keysetLastId = null;
+
+for ($i = 1; $i < 2000; $i++) {
+    $result = $orm->keysetPagination('keyset_select.sql', $userId, $limit, $keysetLastId);
+    if (empty($result['data'])) break;
+    $idForKeyset[$i] = $result['lastId'];
+    $keysetLastId = $result['lastId'];
+}
+
+
+CLHelper::send("Keyset: ", TextColorsEnum::RED);
+$start = microtime(true);
+$orm->keysetPagination('keyset_select.sql', $userId, $limit, null)['lastId'];
+$end = microtime(true);
+CLHelper::send("Time: " . ($end - $start) * 1000 . ". Page 1", TextColorsEnum::GREEN);
+
+
+
+foreach ([499, 1999] as $page) {
+    if(!isset($idForKeyset[$page])) continue;
+    $start = microtime(true);
+    $result = $orm->keysetPagination('keyset_select.sql', $userId, $limit, $idForKeyset[$page]);
+    $end = microtime(true);
+    CLHelper::send("Time: " . ($end - $start) * 1000 . ". Page " . $page, TextColorsEnum::GREEN);
 }
 
 
