@@ -1,6 +1,6 @@
 SELECT
-    user.id as user_id
-    user.email
+    user.id as user_id,
+    user.email,
     user.name,
     COUNT(DISTINCT orders.id) as orders_count,
     SUM(orders.total_amount) as total_spend,

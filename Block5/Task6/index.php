@@ -32,18 +32,20 @@ $query4 = $orm->selectQuery('q4_conversion.sql', [':date_from' => '2021-09-16 13
 $query5 = $orm->selectQuery('q5_suspicious.sql');
 //var_dump($query1);
 
+
+
 $offsetQuery1 = $orm->offsetPagination('offset_select.sql', 25591, 10, 1);
 $offsetQuery2 = $orm->offsetPagination('offset_select.sql', 25591, 10, 500);
 $offsetQuery3 = $orm->offsetPagination('offset_select.sql', 25591, 10, 2000);
 
-//var_dump($offsetQuery1);
+var_dump($offsetQuery1);
 
-
-$keysetQuery1 = $orm->keysetPagination('keyset_select.sql', 1313, 10);
+exit(0);
+$keysetQuery1 = $orm->keysetPagination('keyset_select.sql', 25591, 10);
 $resultData = $keysetQuery1;
 var_dump($resultData['data']);
 while(!empty($resultData) && count($resultData['data']) > 0 && $resultData['lastId'] !== null) {
-    $nextKeysetQuery = $orm->keysetPagination('keyset_select.sql', 1313, 10, $resultData['lastId']);
+    $nextKeysetQuery = $orm->keysetPagination('keyset_select.sql', 25591, 10, $resultData['lastId']);
     $resultData = $nextKeysetQuery;
 }
 
