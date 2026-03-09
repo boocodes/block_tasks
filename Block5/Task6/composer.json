@@ -1,0 +1,23 @@
+{
+    "name": "java2/task1",
+    "autoload": {
+        "psr-4": {
+            "StorageTask6\\": "src/",
+            "Database6\\": "database/"
+        },
+        "files": [
+            "database/bin/pay_order.php",
+            "database/bin/race_test.php"
+        ]
+    },
+    "authors": [
+        {
+            "name": "Nick Felker",
+            "email": "felker.nick@bk.ru"
+        }
+    ],
+    "require": {
+        "fakerphp/faker": "^1.24",
+        "spatie/async": "^1.8"
+    }
+}
