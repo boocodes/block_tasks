@@ -18,10 +18,10 @@ SELECT order_items.id,
        order_items.order_id,
        order_items.product_id,
        products.sku,
-       products.title
+       products.title,
        order_items.qty,
        order_items.price,
        (order_items.qty * order_items.price)
 FROM `order_items` order_items
          LEFT JOIN `products` products ON order_items.product_id = products.id
-ORDER BY orders_items.id;
+ORDER BY order_items.id;
