@@ -49,5 +49,6 @@ function pay_order(PDO $connection, string $order_id): void
         CLHelper::send("Order " . $order_id . " paid", TextColorsEnum::GREEN);
     } catch (PDOException $e) {
         CLHelper::send($e->getMessage(), TextColorsEnum::RED);
+        $connection->rollBack();
     }
 }
