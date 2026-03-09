@@ -16,6 +16,8 @@ class DatabaseSeeds implements Seedable
 
     private array $userEmails = [];
     private array $productsSku = [];
+    private static array $ordersId = [];
+    private static int $counterOrderId = 0;
     public function run(): array
     {
         $this->faker = Factory::create();
@@ -50,11 +52,16 @@ class DatabaseSeeds implements Seedable
                     'count' => 100000,
                     'data' => [
                         'order_id' => function () {
-                            return random_int(1, 10);
+                            return self::$ordersId[self::$counterOrderId++];
                         },
                         'status' => function () {
-                            $data = [PaymentStatusEmum::PAID->value, PaymentStatusEmum::PAID->value, PaymentStatusEmum::PAID->value, PaymentStatusEmum::FAILED->value, PaymentStatusEmum::PENDING];
-                            return array_rand(array_values($data));
+                            $data = [PaymentStatusEmum::PAID->value,
+                                PaymentStatusEmum::PAID->value,
+                                PaymentStatusEmum::PAID->value,
+                                PaymentStatusEmum::FAILED->value,
+                                PaymentStatusEmum::PENDING->value
+                            ];
+                            return $data[array_rand($data)];
                         },
 
                         'provider' => function () {
@@ -94,8 +101,14 @@ class DatabaseSeeds implements Seedable
                             'references' => 'user'
                         ],
                         'status' => function () {
-                            $data = [OrderStatusEnum::PAID->value, OrderStatusEnum::PAID->value, OrderStatusEnum::PAID->value, OrderStatusEnum::NEW->value, OrderStatusEnum::CANCELLED->value];
-                            return array_rand(array_values($data));
+                            $data = [
+                                OrderStatusEnum::PAID->value,
+                                OrderStatusEnum::PAID->value,
+                                OrderStatusEnum::PAID->value,
+                                OrderStatusEnum::NEW->value,
+                                OrderStatusEnum::CANCELLED->value
+                            ];
+                            return $data[array_rand($data)];
                         },
                         'total_amount' => function () {
                             return random_int(10, 99999);
@@ -103,7 +116,10 @@ class DatabaseSeeds implements Seedable
                         'created_at' => function () {
                             return $this->faker->dateTimeBetween('-10 years', 'now');
                         }
-                    ]
+                    ],
+                    'hook' => function (int $orderId) {
+                        self::$ordersId[] = $orderId;
+                    }
                 ],
             'products' =>
                 [

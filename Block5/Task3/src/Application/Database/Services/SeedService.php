@@ -10,6 +10,7 @@ use StorageTask3\Domain\Enums\TextColorsEnum;
 use StorageTask3\Domain\Interfaces\Seedable;
 
 
+
 class SeedService
 {
     private PDO $connection;
@@ -41,7 +42,7 @@ class SeedService
     }
 
 
-    private function insertSeedingValues(string $table, array $data)
+    private function insertSeedingValues(string $table, array $data): void
     {
         if (!isset($data['count'])) {
             CLHelper::send('At seed: ' . $table . ', do not specified count size. Continue to next', TextColorsEnum::RED);
@@ -54,6 +55,7 @@ class SeedService
 
         $dataCount = $data['count'];
         $dataTemplate = $data['data'];
+        $dataHook = $data['hook'] ?? null;
 
         $query = $this->connection->query("DESCRIBE `$table`");
         $tableColumns = $query->fetchAll(PDO::FETCH_COLUMN);
@@ -87,6 +89,9 @@ class SeedService
                 if($currentId)
                 {
                     $foreignKeyCache[$table][] = $currentId;
+                    if($dataHook && is_callable($dataHook)) {
+                        $dataHook($currentId);
+                    }
                 }
                 CLHelper::progressBar($i + 1, $dataCount);
 

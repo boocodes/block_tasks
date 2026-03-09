@@ -17,16 +17,16 @@ $seedingService = new SeedService(new DatabaseSeeds(), $connectionService->getCo
 
 
 $application = new Application($connectionService, $migrationService, $seedingService);
-//$application->boot();
+$application->boot();
 
-$orm = new ORM($connectionService->getConnection());
-
-$query1 = $orm->selectQuery('q1_top_users.sql');
-$query2 = $orm->selectQuery('q2_products_sales.sql', [':date_from' => '2021-09-16 13:00:00', ':date_to' => '2025-09-16 18:00:00']);
-$query3 = $orm->selectQuery('q3_orders_with_items.sql');
-$query4 = $orm->selectQuery('q4_conversion.sql', [':date_from' => '2021-09-16 13:00:00', ':date_to' => '2025-09-16 18:00:00']);
-$query5 = $orm->selectQuery('q5_suspicious.sql');
-var_dump($query5);
+//$orm = new ORM($connectionService->getConnection());
+//
+//$query1 = $orm->selectQuery('q1_top_users.sql');
+//$query2 = $orm->selectQuery('q2_products_sales.sql', [':date_from' => '2021-09-16 13:00:00', ':date_to' => '2025-09-16 18:00:00']);
+//$query3 = $orm->selectQuery('q3_orders_with_items.sql');
+//$query4 = $orm->selectQuery('q4_conversion.sql', [':date_from' => '2021-09-16 13:00:00', ':date_to' => '2025-09-16 18:00:00']);
+//$query5 = $orm->selectQuery('q5_suspicious.sql');
+//var_dump($query5);
 
 
 
