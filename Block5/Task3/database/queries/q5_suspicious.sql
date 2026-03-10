@@ -6,4 +6,4 @@ ON orders.user_id = user.id
 WHERE payments.status = 'failed'
 AND payments.created_at >= NOW() - INTERVAL 24 HOUR
 GROUP BY orders.user_id
-HAVING COUNT(*) > 3
+HAVING COUNT(*) > 3;

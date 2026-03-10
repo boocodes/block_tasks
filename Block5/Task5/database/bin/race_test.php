@@ -10,8 +10,6 @@ use StorageTask5\Domain\Enums\TextColorsEnum;
 
 function race_test(array $database, string $order_id, int $processCount): void
 {
-
-
     CLHelper::send("Setup " . $processCount . " processes", TextColorsEnum::GREEN);
     $pool = Pool::create();
 
@@ -26,6 +24,4 @@ function race_test(array $database, string $order_id, int $processCount): void
         });
     }
     $pool->wait();
-
-
 }
