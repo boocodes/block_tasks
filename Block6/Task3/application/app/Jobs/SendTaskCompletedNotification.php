@@ -27,7 +27,7 @@ class SendTaskCompletedNotification implements ShouldQueue
     }
     public function backoff(): array
     {
-        return $this->$this->backoff;
+        return $this->backoff;
     }
 
     public function failed(Throwable $exception): void
