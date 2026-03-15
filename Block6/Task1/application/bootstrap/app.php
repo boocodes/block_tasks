@@ -3,7 +3,7 @@
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
-use Task4\App\Http\Middleware\RequestIdMiddleware;
+use Task1\App\Http\Middleware\RequestIdMiddleware;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(

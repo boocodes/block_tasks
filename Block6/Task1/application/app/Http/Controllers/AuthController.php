@@ -1,14 +1,14 @@
 <?php
 
-namespace Task4\App\Http\Controllers;
+namespace Task1\App\Http\Controllers;
 
 use Illuminate\Support\Facades\Hash;
-use Task4\App\Http\Controllers\Controller;
+use Task1\App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use Task4\App\Models\User;
-use Task4\App\Http\Controllers\Task\BaseController;
-use Task4\App\Http\Requests\User\RegistrationRequest;
-use Task4\App\Http\Requests\User\LoginRequest;
+use Task1\App\Models\User;
+use Task1\App\Http\Controllers\Task\BaseController;
+use Task1\App\Http\Requests\User\RegistrationRequest;
+use Task1\App\Http\Requests\User\LoginRequest;
 use Illuminate\Http\JsonResponse;
 
 class AuthController extends BaseController

@@ -2,8 +2,8 @@
 
 namespace Database\Seeders;
 
-use Task4\App\Models\Task;
-use Task4\App\Models\User;
+use Task1\App\Models\Task;
+use Task1\App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 

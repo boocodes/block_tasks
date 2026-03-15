@@ -1,10 +1,10 @@
 <?php
 
-namespace Task4\App\Http\Controllers\Task;
+namespace Task1\App\Http\Controllers\Task;
 
 use Illuminate\Http\Request;
-use Task4\App\Http\Resources\Task\TaskResource;
-use Task4\App\Models\Task;
+use Task1\App\Http\Resources\Task\TaskResource;
+use Task1\App\Models\Task;
 
 
 class GetByIdController extends BaseController

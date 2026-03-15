@@ -1,10 +1,10 @@
 <?php
 
-namespace Task4\App\Policies;
+namespace Task1\App\Policies;
 
 use Illuminate\Auth\Access\Response;
-use Task4\App\Models\Task;
-use Task4\App\Models\User;
+use Task1\App\Models\Task;
+use Task1\App\Models\User;
 
 class TaskPolicy
 {

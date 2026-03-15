@@ -1,12 +1,12 @@
 <?php
 
-namespace Task4\App\Providers;
+namespace Task1\App\Providers;
 
 use Illuminate\Support\ServiceProvider;
 
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ProviderRoot;
-use Task4\App\Policies\TaskPolicy;
-use Task4\App\Models\Task;
+use Task1\App\Policies\TaskPolicy;
+use Task1\App\Models\Task;
 
 
 class AuthServiceProvider extends ProviderRoot

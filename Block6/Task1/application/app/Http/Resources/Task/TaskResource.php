@@ -1,6 +1,6 @@
 <?php
 
-namespace Task4\App\Http\Resources\Task;
+namespace Task1\App\Http\Resources\Task;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;

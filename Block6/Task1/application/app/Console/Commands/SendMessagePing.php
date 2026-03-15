@@ -1,9 +1,9 @@
 <?php
 
-namespace Task4\App\Console\Commands;
+namespace Task1\App\Console\Commands;
 
 use Illuminate\Console\Command;
-use Task4\App\Jobs\MessagePingJob;
+use Task1\App\Jobs\MessagePingJob;
 
 class SendMessagePing extends Command
 {
