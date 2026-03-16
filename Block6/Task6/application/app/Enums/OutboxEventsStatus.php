@@ -1,0 +1,11 @@
+<?php 
+
+namespace Task6\App\Enums;
+
+
+enum OutboxEventsStatus: string
+{
+    case NEW = "new";
+    case PUBLISHED = "published";
+    case FAILED = "failed";
+}
