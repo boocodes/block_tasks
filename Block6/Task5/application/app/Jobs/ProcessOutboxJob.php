@@ -60,7 +60,7 @@ class ProcessOutboxJob implements ShouldQueue
 
         $remaingCount = OutboxEvents::where('status', OutboxEventsStatus::NEW)->where(function ($query) {
             $query->whereNull('available_at')
-                ->orWhere('available_at', '<=', now());
+                ->orWhereRaw(('available_at <= NOW()'));
         })->count();
         if ($remaingCount > 0) {
             static::dispatch()->onQueue('outbox');
