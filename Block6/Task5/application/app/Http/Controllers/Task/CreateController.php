@@ -1,0 +1,16 @@
+<?php
+
+namespace Task5\App\Http\Controllers\Task;
+
+use Task5\App\Http\Requests\Task\CreateRequest;
+use Task5\App\Http\Resources\Task\TaskResource;
+
+
+
+class CreateController extends BaseController
+{
+    public function __invoke(CreateRequest $request)
+    {
+        return $this->service->create($request);
+    }
+}
