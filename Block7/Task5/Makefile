@@ -5,10 +5,10 @@ up:
 down:
 	docker compose down
 migrate:
-	docker exec -i task4-db mysql -uroot -proot task4 > migrate.sql
+	docker exec -i task5-db mysql -uroot -proot task5 > migrate.sql
 seed:
-	docker exec -i task4-db mysql -uroot -proot task4 > seed.sql
+	docker exec -i task5-db mysql -uroot -proot task5 > seed.sql
 test:
-	docker exec task4-app php -l /var/www/html/index.php
+	docker exec task5-app php -l /var/www/html/index.php
 lint:
-	docker exec task4-app find /var/www/html -name "*.php" -exec php -l {}\;
+	docker exec task5-app find /var/www/html -name "*.php" -exec php -l {}\;
