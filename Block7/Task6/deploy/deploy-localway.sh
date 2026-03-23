@@ -8,6 +8,6 @@ docker compose build --no-cache
 
 docker compose up -d
 
-docker exec -i task4-db mysql -uroot -proot task4 < migrate.sql || true
+docker exec -i task6-db mysql -uroot -proot task6 < migrate.sql || true
 
 curl -f http://localhost/alive
