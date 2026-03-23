@@ -23,8 +23,9 @@ class Metrics
         }
         $responseTimeMs = (microtime(true) - $startTime) * 1000;
         $metrics['request_total'] += 1;
-        $metrics['response_total_ms'] += round($responseTimeMs, 2);
+        $metrics['response_total_ms'] += $responseTimeMs;
         $metrics['avg_response_ms'] = round($metrics['response_total_ms'] / $metrics['request_total'], 2);
+        $metrics['response_total_ms'] = round($metrics['response_total_ms'], 2);
         file_put_contents($metricsFile, json_encode($metrics, JSON_PRETTY_PRINT));
     }
 }
