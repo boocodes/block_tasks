@@ -30,7 +30,7 @@ jobs:
       mysql:
         image: mysql:8.0
         env:
-          MYSQL_DATABASE: task4
+          MYSQL_DATABASE: task5
           MYSQL_ROOT_PASSWORD: root
         ports:
           - 3306:3306
@@ -48,7 +48,7 @@ jobs:
       
       - name: Migrations
         run: |
-          mysql -h 127.0.0.1 -uroot -proot task4 < migrate.sql
+          mysql -h 127.0.0.1 -uroot -proot task5 < migrate.sql
 
   build:
     runs-on: ubuntu-latest
@@ -62,13 +62,13 @@ jobs:
           php-version: '8.5'
       
       - name: Build docker image
-        run: docker build -t task4-app .
+        run: docker build -t task5-app .
       
       - name: Save image
-        run: docker save task4-app -o task4-app.tar
+        run: docker save task5-app -o task5-app.tar
       
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: task4-app-image
-          path: task4-app.tar
+          name: task5-app-image
+          path: task5-app.tar
