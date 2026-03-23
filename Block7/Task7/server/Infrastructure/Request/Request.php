@@ -49,7 +49,7 @@ class Request
         else if ($_SERVER['REQUEST_METHOD'] === 'DELETE') $this->method = HttpMethods::DELETE;
         else if($_SERVER['REQUEST_METHOD'] === 'OPTIONS') $this->method = HttpMethods::OPTIONS;
 
-        $this->config = require_once __DIR__ .  '/../../config.php';
+        $this->config = require __DIR__ .  '/../../config.php';
     }
     public function getBody()
     {

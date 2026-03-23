@@ -2,28 +2,53 @@
 
 use Task7\Application\App;
 use Task7\Infrastructure\Request\Request;
-use Task7\Infrastructure\Response\Response;
 use Task7\Application\Model\Task;
 use Task7\Infrastructure\Logger\Logger;
 use Task7\Infrastructure\Middleware\BearerToken;
-use PDO;
-use PDOException;
 use Task7\Infrastructure\Middleware\RequestMiddleware;
 use Task7\Infrastructure\Metrics\Metrics;
+use DateTimeImmutable;
 
 require_once __DIR__ . "/vendor/autoload.php";
+
+$config = require __DIR__ . '/server/config.php';
+
+if ($config['APP_ENV'] === 'production') {
+    error_reporting(0);
+    ini_set('display_errors', 0);
+    ini_set('display_startup_errors', 0);
+
+    set_error_handler(function($errorNo, $errorStr, $errorFile, $errorLine){
+        Logger::info("Error", ['created_at' => new DateTimeImmutable()->format('c'), 'message' => $errorStr]);
+        http_response_code(500);
+        header('Content-Type: application/json');
+        echo json_encode(['status' => 'error', 'message' => 'Internal server error']);
+        exit;
+    });
+    set_exception_handler(function($exception)
+    {
+        Logger::info("Exception", ['created_at' => new DateTimeImmutable()->format('c'), 'message' => $exception->getMessage()]);
+        http_response_code(500);
+        header('Content-Type: application/json');
+        echo json_encode(['status' => 'error', 'message' => 'Internal server error']);
+        exit;
+    });
+}
+
 
 $appInstance = new App(new Request());
 
 
 $appInstance->addGetRoute('/health', function (Request $request) {
     http_response_code(200);
+    throw new Exception('test');
     echo 'ok';
 });
 
 $appInstance->addGetRoute('/ready', function (Request $request) {
+    $config = $request->getConfig();
     try {
-        $db = new PDO("mysql:host=db;dbname=task6", "root", "root");
+        $db = new PDO("mysql:host=db;dbname=" . $config['DB_DATABASE'], $config['DB_USERNAME'], $config['DB_PASSWORD']);
         $db->query("SELECT 1");
         http_response_code(200);
         echo 'ready';
