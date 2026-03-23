@@ -51,7 +51,6 @@ $appInstance->addGetRoute('/metrics', function (Request $request) {
 
 
 $appInstance->addPostRoute('/tasks', function (Request $request) {
-    $startTime = $_SERVER['REQUEST_START_TIME'] ?? microtime(true);
     Logger::info('Creating an task', ['data' => $request->getBody()]);
     $result = new Task()->add($request->getBody());
     if (!empty($result)) {
@@ -61,10 +60,9 @@ $appInstance->addPostRoute('/tasks', function (Request $request) {
     } else {
         http_response_code(422);
     }
-    Metrics::updateMetrics((microtime(true) - $startTime) * 1000, "metrics.json");
+    Metrics::updateMetrics("metrics.json");
 }, [new BearerToken(), new RequestMiddleware()]);
 $appInstance->addGetRoute('/tasks', function (Request $request) {
-    $startTime = $_SERVER['REQUEST_START_TIME'] ?? microtime(true);
     Logger::info('Get all tasks');
     http_response_code(200);
     $limit = $request->getQuery()['limit'] ?? null;
@@ -84,11 +82,10 @@ $appInstance->addGetRoute('/tasks', function (Request $request) {
     } else {
         echo json_encode($result);
     }
-    Metrics::updateMetrics((microtime(true) - $startTime) * 1000, "metrics.json");
+    Metrics::updateMetrics("metrics.json");
 }, [new RequestMiddleware()]);
 
 $appInstance->addGetRoute('/tasks/{id}', function (Request $request, $id) {
-    $startTime = $_SERVER['REQUEST_START_TIME'] ?? microtime(true);
     Logger::info('Get an task by id', ['taskId' => $id]);
     $result = new Task()->getById($id);
     if (empty($result)) {
@@ -98,11 +95,10 @@ $appInstance->addGetRoute('/tasks/{id}', function (Request $request, $id) {
         http_response_code(200);
         echo json_encode($result);
     }
-    Metrics::updateMetrics((microtime(true) - $startTime) * 1000, "metrics.json");
+    Metrics::updateMetrics("metrics.json");
 }, [new RequestMiddleware()]);
 
 $appInstance->addPatchRoute('/tasks/{id}', function (Request $request, $id) {
-    $startTime = $_SERVER['REQUEST_START_TIME'] ?? microtime(true);
     Logger::info('Updating an task', ['taskId' => $id]);
     $result = new Task()->editById($id, $request->getBody());
     if (empty($result)) {
@@ -111,12 +107,11 @@ $appInstance->addPatchRoute('/tasks/{id}', function (Request $request, $id) {
         http_response_code(200);
         echo json_encode($result);
     }
-    Metrics::updateMetrics((microtime(true) - $startTime) * 1000, "metrics.json");
+    Metrics::updateMetrics("metrics.json");
 }, [new BearerToken(), new RequestMiddleware()]);
 
 
 $appInstance->addDeleteRoute('/tasks/{id}', function (Request $request, $id) {
-    $startTime = $_SERVER['REQUEST_START_TIME'] ?? microtime(true);
     Logger::info('Deleting an task', ['taskId' => $id]);
     $result = new Task()->deleteById($id);
     if ($result) {
@@ -124,7 +119,7 @@ $appInstance->addDeleteRoute('/tasks/{id}', function (Request $request, $id) {
     } else {
         http_response_code(404);
     }
-    Metrics::updateMetrics((microtime(true) - $startTime) * 1000, "metrics.json");
+    Metrics::updateMetrics("metrics.json");
 }, [new BearerToken(), new RequestMiddleware()]);
 
 $appInstance->run();

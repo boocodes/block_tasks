@@ -1,26 +1,10 @@
-{"created_at":"2026-03-22T23:27:44+00:00","request_id":"69c07af070619","message":"Request started","context":{"method":"get","endpoint":"\/tasks"}}
-{"created_at":"2026-03-22T23:27:44+00:00","request_id":"69c07af070619","message":"Get all tasks","context":[]}
-{"created_at":"2026-03-22T23:28:08+00:00","request_id":"69c07b0814a9f","message":"Request started","context":{"method":"get","endpoint":"\/tasks\/1"}}
-{"created_at":"2026-03-22T23:28:08+00:00","request_id":"69c07b0814a9f","message":"Get an task by id","context":{"taskId":"1"}}
-{"created_at":"2026-03-22T23:28:17+00:00","request_id":"69c07b113dbf4","message":"Request started","context":{"method":"get","endpoint":"\/metrics"}}
-{"created_at":"2026-03-23T00:20:13+00:00","request_id":"69c0873d98e17","message":"Request started","context":{"method":"get","endpoint":"\/metrics"}}
-{"created_at":"2026-03-23T00:20:17+00:00","request_id":"69c08741429ea","message":"Request started","context":{"method":"get","endpoint":"\/metrics"}}
-{"created_at":"2026-03-23T00:33:59+00:00","request_id":"69c08a776fc14","message":"Request started","context":{"method":"get","endpoint":"\/metrics"}}
-{"created_at":"2026-03-23T00:34:03+00:00","request_id":"69c08a7b92c4f","message":"Request started","context":{"method":"get","endpoint":"\/tasks"}}
-{"created_at":"2026-03-23T00:34:03+00:00","request_id":"69c08a7b92c4f","message":"Get all tasks","context":[]}
-{"created_at":"2026-03-23T00:34:05+00:00","request_id":"69c08a7d68c98","message":"Request started","context":{"method":"get","endpoint":"\/metrics"}}
-{"created_at":"2026-03-23T00:34:13+00:00","request_id":"69c08a85502d3","message":"Request started","context":{"method":"get","endpoint":"\/tasks\/1"}}
-{"created_at":"2026-03-23T00:34:13+00:00","request_id":"69c08a85502d3","message":"Get an task by id","context":{"taskId":"1"}}
-{"created_at":"2026-03-23T00:34:15+00:00","request_id":"69c08a87847b3","message":"Request started","context":{"method":"get","endpoint":"\/metrics"}}
-{"created_at":"2026-03-23T00:36:19+00:00","request_id":"69c08b03c988e","message":"Request started","context":{"method":"get","endpoint":"\/tasks\/1"}}
-{"created_at":"2026-03-23T00:36:19+00:00","request_id":"69c08b03c988e","message":"Get an task by id","context":{"taskId":"1"}}
-{"created_at":"2026-03-23T00:36:20+00:00","request_id":"69c08b04ce34d","message":"Request started","context":{"method":"get","endpoint":"\/metrics"}}
-{"created_at":"2026-03-23T00:36:28+00:00","request_id":"69c08b0c311ae","message":"Request started","context":{"method":"get","endpoint":"\/tasks"}}
-{"created_at":"2026-03-23T00:36:28+00:00","request_id":"69c08b0c311ae","message":"Get all tasks","context":[]}
-{"created_at":"2026-03-23T00:36:29+00:00","request_id":"69c08b0de5b3b","message":"Request started","context":{"method":"get","endpoint":"\/metrics"}}
-{"created_at":"2026-03-23T00:38:05+00:00","request_id":"69c08b6d1b458","message":"Request started","context":{"method":"get","endpoint":"\/tasks"}}
-{"created_at":"2026-03-23T00:38:05+00:00","request_id":"69c08b6d1b458","message":"Get all tasks","context":[]}
-{"created_at":"2026-03-23T00:38:09+00:00","request_id":"69c08b710a734","message":"Request started","context":{"method":"get","endpoint":"\/metrics"}}
-{"created_at":"2026-03-23T00:38:30+00:00","request_id":"69c08b80f3446","message":"Request started","context":{"method":"get","endpoint":"\/tasks"}}
-{"created_at":"2026-03-23T00:38:30+00:00","request_id":"69c08b80f3446","message":"Get all tasks","context":[]}
-{"created_at":"2026-03-23T00:38:36+00:00","request_id":"69c08b87d98b2","message":"Request started","context":{"method":"get","endpoint":"\/metrics"}}
+{"created_at":"2026-03-23T00:48:10+00:00","request_id":"69c08dca730c8","message":"Request started","context":{"method":"get","endpoint":"\/tasks\/1"}}
+{"created_at":"2026-03-23T00:48:10+00:00","request_id":"69c08dca730c8","message":"Get an task by id","context":{"taskId":"1"}}
+{"created_at":"2026-03-23T00:48:29+00:00","request_id":"69c08dddaf096","message":"Request started","context":{"method":"get","endpoint":"\/tasks\/1"}}
+{"created_at":"2026-03-23T00:48:29+00:00","request_id":"69c08dddaf096","message":"Get an task by id","context":{"taskId":"1"}}
+{"created_at":"2026-03-23T00:48:38+00:00","request_id":"69c08de68b233","message":"Request started","context":{"method":"get","endpoint":"\/tasks"}}
+{"created_at":"2026-03-23T00:48:38+00:00","request_id":"69c08de68b233","message":"Get all tasks","context":[]}
+{"created_at":"2026-03-23T00:48:51+00:00","request_id":"69c08df3482ff","message":"Request started","context":{"method":"get","endpoint":"\/tasks"}}
+{"created_at":"2026-03-23T00:48:51+00:00","request_id":"69c08df3482ff","message":"Get all tasks","context":[]}
+{"created_at":"2026-03-23T00:48:54+00:00","request_id":"69c08df671fbc","message":"Request started","context":{"method":"get","endpoint":"\/tasks\/2"}}
+{"created_at":"2026-03-23T00:48:54+00:00","request_id":"69c08df671fbc","message":"Get an task by id","context":{"taskId":"2"}}
