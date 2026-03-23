@@ -1,5 +1,5 @@
 #!/bin/bash
-docker exec -i task5-db mysql -uroot -proot task4 << 'EOF
+docker exec -i task6-db mysql -uroot -proot task6 << 'EOF
 CREATE TABLE IF NOT EXISTS tasks (
     id VARCHAR(50) PRIMARY KEY,
     title VARCHAR(255) NOT NULL,
