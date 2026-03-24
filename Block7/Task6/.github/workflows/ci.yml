@@ -29,7 +29,7 @@ jobs:
       mysql:
         image: mysql:8.0
         env:
-          MYSQL_DATABASE: task4
+          MYSQL_DATABASE: task6
           MYSQL_ROOT_PASSWORD: root
         ports:
           - 3306:3306
