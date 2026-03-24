@@ -5,10 +5,16 @@ up:
 down:
 	docker compose down
 migrate:
-	docker exec -i task3-db mysql -uroot -proot task3 > migrate.sql
+	docker exec -i task7-db mysql -uroot -proot task7 > migrate.sql
 seed:
-	docker exec -i task3-db mysql -uroot -proot task3 > seed.sql
+	docker exec -i task7-db mysql -uroot -proot task7 > seed.sql
 test:
-	docker exec task3-app php -l /var/www/html/index.php
+	docker exec task7-app php -l /var/www/html/index.php
 lint:
-	docker exec task3-app find /var/www/html -name "*.php" -exec php -l {}\;
+	docker exec task7-app find /var/www/html -name "*.php" -exec php -l {}\;
+build-dev:
+	docker compose build --build-arg ENVIRONMENT=dev
+build-prod:
+	docker compose build --build-arg ENVIRONMENT=prod
+shell:
+	docker exec -it task7-app /bin/bash
