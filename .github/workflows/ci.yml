@@ -1,9 +1,9 @@
 name: CRUD
 on: 
   push:
-    branches: [last]
+    branches: [deploy]
   pull_request:
-    branches: [last]
+    branches: [deploy]
 
 jobs:
   lint:
@@ -34,7 +34,8 @@ tests:
     - uses: actions/checkout@v4
     - name: Setup PHP
       uses: shivammathur/setup-php@v2
-      with: php-version: '8.5'
+      with: 
+        php-version: '8.5'
     - name: Copy .env
       run: cp .env.example .env
     - name: Install dependecies
