@@ -2,12 +2,7 @@
 
 namespace Database\Factories;
 
-use App\Enums\Priority;
-use App\Enums\TaskStatus;
-use App\Models\Task;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
 
 /**
  * @extends Factory<Project>

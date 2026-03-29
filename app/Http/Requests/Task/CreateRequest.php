@@ -31,9 +31,10 @@ class CreateRequest extends FormRequest
             'description' => ['required', 'string', 'max:255'],
             'status' => ['required', new Enum(TaskStatus::class)],
             'priority' => ['required', new Enum(Priority::class)],
-            'due_date' => ['required']
+            'due_date' => ['required'],
         ];
     }
+
     public function messages()
     {
         return [
@@ -42,7 +43,7 @@ class CreateRequest extends FormRequest
             'description.required' => 'Description is required',
             'status.required' => 'Status is required',
             'priority.required' => 'Priority is required',
-            'due_date.required' => 'Due date is required'
-        ];  
+            'due_date.required' => 'Due date is required',
+        ];
     }
 }

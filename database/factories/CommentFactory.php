@@ -2,12 +2,7 @@
 
 namespace Database\Factories;
 
-use App\Enums\Priority;
-use App\Enums\TaskStatus;
-use App\Models\Task;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
 
 /**
  * @extends Factory<Comment>
@@ -24,7 +19,7 @@ class CommentFactory extends Factory
         return [
             'task_id' => random_int(1, 10),
             'user_id' => random_int(1, 2),
-            'body' => $this->faker->sentence(),       
+            'body' => $this->faker->sentence(),
         ];
     }
 }

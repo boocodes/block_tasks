@@ -12,15 +12,17 @@ class Comment extends Model
     use HasFactory;
     use SoftDeletes;
 
-
     protected $table = 'comments';
+
     protected $guarded = false;
+
     const UPDATED_AT = null;
 
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
+
     public function task(): BelongsTo
     {
         return $this->belongsTo(Task::class);

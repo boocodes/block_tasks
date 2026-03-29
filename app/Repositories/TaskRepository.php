@@ -2,16 +2,16 @@
 
 namespace App\Repositories;
 
-use Illuminate\Http\Request;
-use App\Models\Task;
 use App\Http\Resources\Task\TaskResource;
+use App\Models\Task;
 use App\Repositories\Interfaces\CrudRepositoryInterface;
+use Illuminate\Http\Request;
 
 class TaskRepository implements CrudRepositoryInterface
 {
     public function get(Request $request, $id)
     {
-        $taskInstance = new Task();
+        $taskInstance = new Task;
         $query = $taskInstance->query();
 
         if ($request->has('status')) {
@@ -24,21 +24,23 @@ class TaskRepository implements CrudRepositoryInterface
             $query->where('due_date', '>=', $request->input('due_date'));
         }
         if ($request->has('search')) {
-            $query->where('title', 'like', $request->input('search') . '%');
+            $query->where('title', 'like', $request->input('search').'%');
         }
         $result = $query->find($id);
-        if (!$result) {
+        if (! $result) {
             return response('', 404);
         }
         $response = new TaskResource($result);
+
         return $response;
     }
+
     public function getAll(Request $request)
     {
         $limit = $request->input('limit', 10);
         $cursor = $request->input('cursor');
 
-        $taskInstance = new Task();
+        $taskInstance = new Task;
         $query = $taskInstance->query();
 
         if ($request->has('status')) {
@@ -51,7 +53,7 @@ class TaskRepository implements CrudRepositoryInterface
             $query->where('due_date', '>=', $request->input('due_date'));
         }
         if ($request->has('search')) {
-            $query->where('title', 'like', $request->input('search') . '%');
+            $query->where('title', 'like', $request->input('search').'%');
         }
 
         if ($cursor) {
@@ -68,7 +70,7 @@ class TaskRepository implements CrudRepositoryInterface
         return response()->json([
             'data' => TaskResource::collection($tasksList),
             'meta' => [
-                'limit' => (int)$limit,
+                'limit' => (int) $limit,
                 'next_cursor' => $nextCursor,
                 'has_more' => $hasMoreFlag,
             ],

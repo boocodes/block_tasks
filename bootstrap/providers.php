@@ -1,6 +1,9 @@
 <?php
 
+use App\Providers\AppServiceProvider;
+use App\Providers\RepositoryProvider;
+
 return [
-    App\Providers\AppServiceProvider::class,
-    App\Providers\RepositoryProvider::class,
+    AppServiceProvider::class,
+    RepositoryProvider::class,
 ];

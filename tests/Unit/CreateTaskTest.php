@@ -1,21 +1,20 @@
 <?php
 
-
 namespace Tests\Unit;
 
 use App\Enums\Priority;
 use App\Enums\TaskStatus;
-use Tests\TestCase;
-use App\Services\TaskService;
 use App\Http\Requests\Task\CreateRequest;
+use App\Services\TaskService;
 use DateTimeImmutable;
 use Illuminate\Container\Container;
+use Tests\TestCase;
 
 class CreateTaskTest extends TestCase
 {
-    public function testMain()
+    public function test_main()
     {
-        $taskService = new TaskService();
+        $taskService = new TaskService;
         $newTaskData =
             [
                 'title' => 'test',
@@ -23,7 +22,7 @@ class CreateTaskTest extends TestCase
                 'status' => TaskStatus::NEW->value,
                 'priority' => Priority::NORMAL->value,
                 'due_date' => new DateTimeImmutable()->format('c'),
-                'project_id' => '1'
+                'project_id' => '1',
             ];
         $request = CreateRequest::create('/tasks', 'POST', $newTaskData);
         $request->setContainer(Container::getInstance());

@@ -14,13 +14,16 @@ class Project extends Model
     use SoftDeletes;
 
     protected $table = 'projects';
+
     protected $guarded = false;
+
     const UPDATED_AT = null;
 
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
+
     public function tasks(): HasMany
     {
         return $this->hasMany(Task::class);

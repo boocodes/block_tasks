@@ -16,18 +16,20 @@ class Task extends Model
     use SoftDeletes;
 
     protected $table = 'tasks';
+
     protected $guarded = false;
 
-    protected $casts = 
-    [
-        'status' => TaskStatus::class,
-        'priority' => Priority::class,
-    ];
+    protected $casts =
+        [
+            'status' => TaskStatus::class,
+            'priority' => Priority::class,
+        ];
 
     public function project(): BelongsTo
     {
         return $this->belongsTo(Project::class);
     }
+
     public function comments(): HasMany
     {
         return $this->hasMany(Comment::class);

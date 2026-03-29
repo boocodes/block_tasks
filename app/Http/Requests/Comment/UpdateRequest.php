@@ -23,13 +23,14 @@ class UpdateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'body' => ['required', 'string', 'max:512']
+            'body' => ['required', 'string', 'max:512'],
         ];
     }
+
     public function messages()
     {
         return [
-            'body.required' => 'Body is required'
+            'body.required' => 'Body is required',
         ];
     }
 }

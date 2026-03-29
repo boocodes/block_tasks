@@ -1,19 +1,17 @@
 <?php
 
-
 namespace Tests\Unit;
 
-use Tests\TestCase;
 use App\Repositories\TaskRepository;
 use Illuminate\Http\Request;
-use App\Http\Resources\Task\TaskResource;
+use Tests\TestCase;
 
 class GetTasksListTest extends TestCase
 {
-    public function testMain()
+    public function test_main()
     {
-        $taskRepository = new TaskRepository();
-        $request = new Request();
+        $taskRepository = new TaskRepository;
+        $request = new Request;
         $taskList = $taskRepository->getAll($request);
         $taskList = $taskList->getData();
         $this->assertIsObject($taskList);

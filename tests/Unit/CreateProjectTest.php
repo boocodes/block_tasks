@@ -1,18 +1,17 @@
 <?php
 
-
 namespace Tests\Unit;
 
-use Tests\TestCase;
-use App\Services\ProjectService;
 use App\Http\Requests\Project\CreateRequest;
+use App\Services\ProjectService;
 use Illuminate\Container\Container;
+use Tests\TestCase;
 
 class CreateProjectTest extends TestCase
 {
-    public function testMain()
+    public function test_main()
     {
-        $projectService = new ProjectService();
+        $projectService = new ProjectService;
         $newProjectDataData =
             [
                 'name' => '1',
