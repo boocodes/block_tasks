@@ -19,37 +19,37 @@ jobs:
         run: |
           php -l public/index.php
           find server -name "*.php" -exec php -l {} \;
-tests:
-  runs-on: ubuntu-latest
-  needs: lint
-  services: 
-    mysql:
-      image: mysql:8.0
-      env:
-        MYSQL_DATABASE: application
-      ports:
-        - 3306:3306
-      options: -health-cmd="mysqladmin ping" --health-interval=10s --health-timout=5s --health-retries=3
-  steps:
-    - uses: actions/checkout@v4
-    - name: Setup PHP
-      uses: shivammathur/setup-php@v2
-      with: 
-        php-version: '8.5'
-    - name: Copy .env
-      run: cp .env.example .env
-    - name: Install dependecies
-      run: composer install --no-progress --no-suggest --prefer-dist
-    - name: Install MySQL Client
-      run: sudo apt-get update && sudo apt-get install -y mysql-client
-    - name: Wait for MySQL ready
-      run: |
-        until mysqladmin ping -h 127.0.0.1 -uroot -proot --silent; do 
-        echo "Waiting for MySQL"
-        sleep 5
-        done
-    - name: Migrations
-      run: php artisan migrate --seed
-    - name : tests
-      run: php artisan test
-         
+  tests:
+    runs-on: ubuntu-latest
+    needs: lint
+    services: 
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_DATABASE: application
+        ports:
+          - 3306:3306
+        options: -health-cmd="mysqladmin ping" --health-interval=10s --health-timout=5s --health-retries=3
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with: 
+          php-version: '8.5'
+      - name: Copy .env
+        run: cp .env.example .env
+      - name: Install dependecies
+        run: composer install --no-progress --no-suggest --prefer-dist
+      - name: Install MySQL Client
+        run: sudo apt-get update && sudo apt-get install -y mysql-client
+      - name: Wait for MySQL ready
+        run: |
+          until mysqladmin ping -h 127.0.0.1 -uroot -proot --silent; do 
+          echo "Waiting for MySQL"
+          sleep 5
+          done
+      - name: Migrations
+        run: php artisan migrate --seed
+      - name : tests
+        run: php artisan test
+          
