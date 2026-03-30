@@ -50,6 +50,10 @@ jobs:
           echo "Waiting for MySQL"
           sleep 5
           done
+      - name: Key generate
+        run: php artisan key:generate
+      - name: Config cache
+        run: php artisan config:cache
       - name: Migrations
         run: php artisan migrate --seed
       - name : tests
