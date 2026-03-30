@@ -22,7 +22,7 @@ class CommentService
 
     public function delete(Request $request, $comment)
     {
-        $commentInstance = new Comment;
+        $commentInstance = new Comment();
         $comment = $commentInstance->find($comment);
         if (! $comment) {
             return response('', 404);
@@ -38,11 +38,11 @@ class CommentService
     {
         $data = $request->validated();
         $commentInstance = new Comment;
-        $commentInstance->find($comment);
-        if (! $commentInstance) {
+        $finded = $commentInstance->find($comment);
+        if (! $finded) {
             return response('', 404);
         }
-        $result = $commentInstance->update($data);
+        $result = $finded->update($data);
         if ($result) {
             return response('', 200);
         }

@@ -12,37 +12,37 @@ class TaskService
     public function create(CreateRequest $request)
     {
         $data = $request->validated();
-        $commentInstance = new Task;
-        if ($commentInstance->create($data)) {
+        $taskInstance = new Task();
+        if ($taskInstance->create($data)) {
             return response('', 201);
         }
 
         return response('', 500);
     }
 
-    public function delete(Request $request, $comment)
+    public function delete(Request $request, $task)
     {
-        $commentInstance = new Task;
-        $comment = $commentInstance->find($comment);
-        if (! $comment) {
+        $taskInstance = new Task();
+        $taskResult = $taskInstance->find($task);
+        if (! $taskResult) {
             return response('', 404);
         }
-        if ($comment->delete()) {
+        if ($taskResult->delete()) {
             return response('', 204);
         }
 
         return response('', 500);
     }
 
-    public function update(UpdateRequest $request, $comment)
+    public function update(UpdateRequest $request, $task)
     {
         $data = $request->validated();
-        $commentInstance = new Task;
-        $commentInstance->find($comment);
-        if (! $commentInstance) {
+        $taskInstance = new Task();
+        $finded = $taskInstance->find($task);
+        if (! $finded) {
             return response('', 404);
         }
-        $result = $commentInstance->update($data);
+        $result = $finded->update($data);
         if ($result) {
             return response('', 200);
         }

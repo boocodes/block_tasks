@@ -4,15 +4,15 @@ namespace App\Repositories;
 
 use App\Http\Resources\Comment\CommentResource;
 use App\Models\Comment;
-use App\Repositories\Interfaces\CrudRepositoryInterface;
+use App\Repositories\Interfaces\CommentRepositoryInterface;
 use Illuminate\Http\Request;
 
-class CommentRepository implements CrudRepositoryInterface
+class CommentRepository implements CommentRepositoryInterface
 {
-    public function get(Request $request, $id)
+    public function get(Request $request, $comment)
     {
-        $commentInstance = new Comment;
-        $resultComment = $commentInstance->find($id);
+        $commentInstance = new Comment();
+        $resultComment = $commentInstance->find($comment);
         if (! $resultComment) {
             return response('', 404);
         }
@@ -23,7 +23,7 @@ class CommentRepository implements CrudRepositoryInterface
 
     public function getAll(Request $request)
     {
-        $comment = new Comment;
+        $comment = new Comment();
         $resultArray = $comment->query()->orderBy('id')->get();
 
         return CommentResource::collection($resultArray);

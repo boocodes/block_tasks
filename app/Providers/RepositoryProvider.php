@@ -3,7 +3,9 @@
 namespace App\Providers;
 
 use App\Repositories\CommentRepository;
-use App\Repositories\Interfaces\CrudRepositoryInterface;
+use App\Repositories\Interfaces\CommentRepositoryInterface;
+use App\Repositories\Interfaces\ProjectRepositoryInterface;
+use App\Repositories\Interfaces\TaskRepositoryInterface;
 use App\Repositories\ProjectRepository;
 use App\Repositories\TaskRepository;
 use Illuminate\Support\ServiceProvider;
@@ -16,15 +18,15 @@ class RepositoryProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->bind(
-            CrudRepositoryInterface::class,
+            CommentRepositoryInterface::class,
             CommentRepository::class
         );
         $this->app->bind(
-            CrudRepositoryInterface::class,
+            ProjectRepositoryInterface::class,
             ProjectRepository::class
         );
         $this->app->bind(
-            CrudRepositoryInterface::class,
+            TaskRepositoryInterface::class,
             TaskRepository::class
         );
     }

@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Repositories\Interfaces\CrudRepositoryInterface;
+use App\Repositories\Interfaces\CommentRepositoryInterface;
+use App\Repositories\Interfaces\ProjectRepositoryInterface;
+use App\Repositories\Interfaces\TaskRepositoryInterface;
 use App\Services\CommentService;
 use App\Services\ProjectService;
 use App\Services\TaskService;
@@ -15,19 +17,19 @@ abstract class Controller
 
     protected $commentService;
 
-    protected CrudRepositoryInterface $commentRepository;
+    protected CommentRepositoryInterface $commentRepository;
 
-    protected CrudRepositoryInterface $projectRepository;
+    protected ProjectRepositoryInterface $projectRepository;
 
-    protected CrudRepositoryInterface $taskRepository;
+    protected TaskRepositoryInterface $taskRepository;
 
     public function __construct(
         TaskService $taskService,
         ProjectService $projectService,
         CommentService $commentService,
-        CrudRepositoryInterface $commentRepository,
-        CrudRepositoryInterface $projectRepository,
-        CrudRepositoryInterface $taskRepository,
+        CommentRepositoryInterface $commentRepository,
+        ProjectRepositoryInterface $projectRepository,
+        TaskRepositoryInterface $taskRepository,
     ) {
         $this->taskService = $taskService;
         $this->projectService = $projectService;

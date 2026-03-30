@@ -4,15 +4,15 @@ namespace App\Repositories;
 
 use App\Http\Resources\Project\ProjectResource;
 use App\Models\Project;
-use App\Repositories\Interfaces\CrudRepositoryInterface;
+use App\Repositories\Interfaces\ProjectRepositoryInterface;
 use Illuminate\Http\Request;
 
-class ProjectRepository implements CrudRepositoryInterface
+class ProjectRepository implements ProjectRepositoryInterface
 {
-    public function get(Request $request, $id)
+    public function get(Request $request, $project)
     {
-        $projectInstance = new Project;
-        $resultProject = $projectInstance->find($id);
+        $projectInstance = new Project();
+        $resultProject = $projectInstance->find($project);
         if (! $resultProject) {
             return response('', 404);
         }
@@ -23,7 +23,7 @@ class ProjectRepository implements CrudRepositoryInterface
 
     public function getAll(Request $request)
     {
-        $comment = new Project;
+        $comment = new Project();
         $resultArray = $comment->query()->orderBy('id')->get();
 
         return ProjectResource::collection($resultArray);

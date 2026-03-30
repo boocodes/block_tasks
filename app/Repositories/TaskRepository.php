@@ -4,12 +4,12 @@ namespace App\Repositories;
 
 use App\Http\Resources\Task\TaskResource;
 use App\Models\Task;
-use App\Repositories\Interfaces\CrudRepositoryInterface;
+use App\Repositories\Interfaces\TaskRepositoryInterface;
 use Illuminate\Http\Request;
 
-class TaskRepository implements CrudRepositoryInterface
+class TaskRepository implements TaskRepositoryInterface
 {
-    public function get(Request $request, $id)
+    public function get(Request $request, $task)
     {
         $taskInstance = new Task;
         $query = $taskInstance->query();
@@ -26,7 +26,7 @@ class TaskRepository implements CrudRepositoryInterface
         if ($request->has('search')) {
             $query->where('title', 'like', $request->input('search').'%');
         }
-        $result = $query->find($id);
+        $result = $query->find($task);
         if (! $result) {
             return response('', 404);
         }
@@ -40,7 +40,7 @@ class TaskRepository implements CrudRepositoryInterface
         $limit = $request->input('limit', 10);
         $cursor = $request->input('cursor');
 
-        $taskInstance = new Task;
+        $taskInstance = new Task();
         $query = $taskInstance->query();
 
         if ($request->has('status')) {
