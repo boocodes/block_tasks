@@ -4,17 +4,16 @@ namespace Tests\Feature;
 
 use App\Enums\Priority;
 use App\Enums\TaskStatus;
-use Tests\TestCase;
 use App\Models\Task;
 use DateTimeImmutable;
-
+use Tests\TestCase;
 
 class TaskFilterSelection extends TestCase
 {
-    public function testMain()
+    public function test_main()
     {
-        $taskInstance = new Task();
-        $newTaskData = 
+        $taskInstance = new Task;
+        $newTaskData =
         [
             'project_id' => 1,
             'title' => 'From feature test title',
@@ -24,6 +23,6 @@ class TaskFilterSelection extends TestCase
             'due_date' => new DateTimeImmutable()->format('c'),
         ];
         $taskInstance->add($newTaskData);
-        
+
     }
 }

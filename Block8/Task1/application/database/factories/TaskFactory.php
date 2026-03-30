@@ -6,8 +6,6 @@ use App\Enums\Priority;
 use App\Enums\TaskStatus;
 use App\Models\Task;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
 
 /**
  * @extends Factory<Task>
@@ -25,10 +23,11 @@ class TaskFactory extends Factory
         $tasksPriorityArrayValues = [];
         foreach (TaskStatus::cases() as $case) {
             $taskStatusArrayValues[] = $case->value;
-        };
+        }
         foreach (Priority::cases() as $priority) {
             $tasksPriorityArrayValues[] = $priority->value;
         }
+
         return [
             'project_id' => random_int(1, 2),
             'title' => $this->faker->word(),

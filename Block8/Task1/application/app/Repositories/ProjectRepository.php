@@ -2,27 +2,30 @@
 
 namespace App\Repositories;
 
-use Illuminate\Http\Request;
-use App\Models\Project;
 use App\Http\Resources\Project\ProjectResource;
-use App\Repositories\Interfaces\CrudRepositoryInterface;
+use App\Models\Project;
+use App\Repositories\Interfaces\ProjectRepositoryInterface;
+use Illuminate\Http\Request;
 
-class ProjectRepository extends CrudRepositoryInterface
+class ProjectRepository implements ProjectRepositoryInterface
 {
-    public function get(Request $request, $id)
+    public function get(Request $request, $project)
     {
-        $result = new Project();
-        $result = $result->find($id);
-        if (!$result) {
+        $projectInstance = new Project();
+        $resultProject = $projectInstance->find($project);
+        if (! $resultProject) {
             return response('', 404);
         }
-        $response = new ProjectResource($result);
+        $response = new ProjectResource($resultProject);
+
         return $response;
     }
+
     public function getAll(Request $request)
     {
         $comment = new Project();
         $resultArray = $comment->query()->orderBy('id')->get();
+
         return ProjectResource::collection($resultArray);
     }
 }

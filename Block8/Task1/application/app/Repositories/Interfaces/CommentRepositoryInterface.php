@@ -4,8 +4,9 @@ namespace App\Repositories\Interfaces;
 
 use Illuminate\Http\Request;
 
-interface CrudRepositoryInterface 
+interface CommentRepositoryInterface
 {
-    public function get(Request $request, $id);
+    public function get(Request $request, $comment);
+
     public function getAll(Request $request);
 }

@@ -25,7 +25,7 @@ class CreateRequest extends FormRequest
         return [
             'task_id' => ['required', 'string', 'max:255'],
             'user_id' => ['required', 'string', 'max:255'],
-            'body' => ['required', 'string', 'max:512']
+            'body' => ['required', 'string', 'max:512'],
         ];
     }
 
@@ -34,7 +34,7 @@ class CreateRequest extends FormRequest
         return [
             'task_id.required' => 'Task id is required',
             'user_id.required' => 'User id is required',
-            'body.required' => 'Body is required'
+            'body.required' => 'Body is required',
         ];
     }
 }

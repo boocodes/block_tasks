@@ -27,11 +27,12 @@ class CreateRequest extends FormRequest
             'owner_id' => ['required', 'string', 'max:255'],
         ];
     }
+
     public function messages()
     {
         return [
             'name.required' => 'Name is required',
-            'owner_id.required' => 'Owner id is required'
+            'owner_id.required' => 'Owner id is required',
         ];
     }
 }

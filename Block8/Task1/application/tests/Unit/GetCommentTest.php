@@ -1,19 +1,19 @@
-<?php 
-
+<?php
 
 namespace Tests\Unit;
 
-use Tests\TestCase;
-use Illuminate\Http\Request;
+use App\Http\Resources\Comment\CommentResource;
 use App\Repositories\CommentRepository;
+use Illuminate\Http\Request;
+use Tests\TestCase;
 
 class GetCommentTest extends TestCase
 {
-    public function testMain()
+    public function test_main()
     {
-       $commentRepository = new CommentRepository();
-       $request = new Request();
-       $comment = $commentRepository->get($request, 1);
-       $this->assertIsArray($comment);
+        $commentRepository = new CommentRepository;
+        $request = new Request;
+        $comment = $commentRepository->get($request, 1);
+        $this->assertInstanceOf(CommentResource::class, $comment);
     }
 }

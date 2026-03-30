@@ -2,11 +2,11 @@
 
 namespace App\Http\Requests\Task;
 
+use App\Enums\Priority;
+use App\Enums\TaskStatus;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rules\Enum;
-use App\Enums\TaskStatus;
-use App\Enums\Priority;
 
 class UpdateRequest extends FormRequest
 {
@@ -30,7 +30,7 @@ class UpdateRequest extends FormRequest
             'description' => ['required', 'string', 'max:255'],
             'status' => ['required', new Enum(TaskStatus::class)],
             'priority' => ['required', new Enum(Priority::class)],
-            'due_date' => ['required']
+            'due_date' => ['required'],
         ];
     }
 
@@ -41,7 +41,7 @@ class UpdateRequest extends FormRequest
             'description.required' => 'Description is required',
             'status.required' => 'Status is required',
             'priority.required' => 'Priority is required',
-            'due_date.required' => 'Due date is required'
-        ];  
+            'due_date.required' => 'Due date is required',
+        ];
     }
 }
