@@ -3,26 +3,32 @@
 namespace Tests\Unit;
 
 use Final2\App\Http\Requests\Project\CreateRequest;
+use Final2\App\Models\User;
 use Final2\App\Services\ProjectService;
 use Illuminate\Container\Container;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
 class CreateProjectTest extends TestCase
 {
-    public function test_main()
+    use RefreshDatabase;
+    public function testMain()
     {
-        $projectService = new ProjectService;
-        $newProjectDataData =
-            [
-                'name' => '1',
-                'owner_id' => '1',
-            ];
-        $request = CreateRequest::create('/projects', 'POST', $newProjectDataData);
-        $request->setContainer(Container::getInstance());
-        $request->setRedirector(app('redirect'));
-        $request->validateResolved();
-        $result = $projectService->create($request);
-        $this->assertEquals($result->getStatusCode(), 201);
-        $this->assertEquals($result->getContent(), '');
+        $user = User::factory()->create();
+
+        Sanctum::actingAs($user);
+
+        $projectData = [
+            'name' => 'hello test',
+        ];
+
+        $response = $this->postJson('/api/projects', $projectData);
+
+        $response->assertStatus(201);
+        $this->assertDatabaseHas('projects', [
+            'name' => $projectData['name'],
+
+        ]);
     }
 }

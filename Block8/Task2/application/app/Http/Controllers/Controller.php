@@ -9,6 +9,7 @@ use Final2\App\Repositories\Interfaces\TaskRepositoryInterface;
 use Final2\App\Services\CommentService;
 use Final2\App\Services\ProjectService;
 use Final2\App\Services\TaskService;
+use Final2\App\Services\UserService;
 
 abstract class Controller
 {
@@ -16,6 +17,8 @@ abstract class Controller
 
 
     protected $taskService;
+    
+    protected $userService;
 
     protected $projectService;
 
@@ -31,6 +34,7 @@ abstract class Controller
         TaskService $taskService,
         ProjectService $projectService,
         CommentService $commentService,
+        UserService $userService,
         CommentRepositoryInterface $commentRepository,
         ProjectRepositoryInterface $projectRepository,
         TaskRepositoryInterface $taskRepository,
@@ -38,6 +42,7 @@ abstract class Controller
         $this->taskService = $taskService;
         $this->projectService = $projectService;
         $this->commentService = $commentService;
+        $this->userService = $userService;
 
         $this->commentRepository = $commentRepository;
         $this->taskRepository = $taskRepository;

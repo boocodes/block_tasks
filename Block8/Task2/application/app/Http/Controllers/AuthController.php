@@ -13,45 +13,18 @@ class AuthController extends Controller
 {
     public function registration(RegistrationRequest $request): JsonResponse
     {
-        $data = $request->validated();
-        $user = new User()->query()
-            ->create($data);
-        $token = $user->createToken('api_token')->plainTextToken;
-        return response()->json([
-            'user' => $user,
-            'token' => $token
-        ], 201);
+        return $this->userService->registration($request);
     }
     public function loginRequest(LoginRequest $request)
     {
-        $data = $request->validated();
-        $user = new User()->query()
-            ->where('email', $data['email'])
-            ->first();
-        if(!$user || !Hash::check($data['password'], $user->password))
-            {
-                return response()->json([
-                    'error' => 'Wrong email or password'
-                ], 422);
-            }
-        $token = $user->createToken('api_token')->plainTextToken;
-        return response()->json([
-            'user' => $user,
-            'token' => $token
-        ], 200);
+        return $this->userService->login($request);
     }
     public function me(Request $request): JsonResponse
     {
-        return response()->json([
-            'user' => $request->user(),
-        ], 200);
+        return $this->userService->me($request);
     }
     public function logout(Request $request): JsonResponse
     {
-        $user = $request->user();
-        $user->currentAccessToken()->delete();
-        return response()->json([
-            'message' => 'Logged out',
-        ], 200);
+        return $this->userService->logout($request);
     }
 }
