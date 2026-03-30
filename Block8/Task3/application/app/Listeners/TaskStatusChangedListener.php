@@ -27,7 +27,7 @@ class TaskStatusChangedListener
         $auditLogInstance = new AuditLogs();
         $auditLogInstance->create([
             'occured_at' => new \DateTimeImmutable()->format('c'),
-            'entity_type' => 'Task',
+            'entity_type' => Task::class,
             'entity_id' => $event->task->id,
             'action' => 'Changed status',
             'meta' => json_encode([

@@ -51,12 +51,13 @@ class TaskService
         }
         $result = $finded->update($data);
 
-        TaskStatusChangedEvent::dispatch($finded, $initialTaskStatus, $request->user()->id);
+        if ($initialTaskStatus !== $finded->status->value) {
+            TaskStatusChangedEvent::dispatch($finded, $initialTaskStatus, $request->user()->id);
+        }
 
         if ($initialTaskStatus !== TaskStatus::DONE->value && $finded->status->value === TaskStatus::DONE->value) {
             TaskCompletedEvent::dispatch($finded, $request->user()->id);
         }
-
 
         if ($result) {
             return response('', 200);

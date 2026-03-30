@@ -4,6 +4,7 @@ namespace Final3\App\Listeners;
 
 use Final3\App\Events\TaskCompletedEvent;
 use Final3\App\Models\AuditLogs;
+use Final3\App\Models\Task;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
 
@@ -25,7 +26,7 @@ class TaskCompletedListener
         $auditLogInstance = new AuditLogs();
         $auditLogInstance->create([
             'occured_at' => new \DateTimeImmutable()->format('c'),
-            'entity_type' => 'Task',
+            'entity_type' => Task::class,
             'entity_id' => $event->task->id,
             'action' => 'Completed',
             'meta' => json_encode([

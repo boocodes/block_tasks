@@ -6,6 +6,7 @@ use Final3\App\Events\TaskCreatedEvent;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
 use Final3\App\Models\AuditLogs;
+use Final3\App\Models\Task;
 
 class TaskCreatedListener
 {
@@ -25,7 +26,7 @@ class TaskCreatedListener
         $auditLogInstance = new AuditLogs();
         $auditLogInstance->create([
             'occured_at' => new \DateTimeImmutable()->format('c'),
-            'entity_type' => 'Task',
+            'entity_type' => Task::class,
             'entity_id' => $event->task->id,
             'action' => 'Created',
             'meta' => json_encode([

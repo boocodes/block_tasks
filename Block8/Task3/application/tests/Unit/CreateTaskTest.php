@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests2\Unit;
+namespace Tests3\Feature;
 
 use Final3\App\Enums\Priority;
 use Final3\App\Enums\TaskStatus;
@@ -9,7 +9,7 @@ use Final3\App\Models\Project;
 use Final3\App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Sanctum\Sanctum;
-use Tests2\TestCase;
+use Tests3\TestCase;
 
 class CreateTaskTest extends TestCase
 {

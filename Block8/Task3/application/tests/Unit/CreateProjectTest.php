@@ -1,11 +1,11 @@
 <?php
 
-namespace Tests2\Unit;
+namespace Tests3\Feature;
 
 use Final3\App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Sanctum\Sanctum;
-use Tests2\TestCase;
+use Tests3\TestCase;
 
 class CreateProjectTest extends TestCase
 {
