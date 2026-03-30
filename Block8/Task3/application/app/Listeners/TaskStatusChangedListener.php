@@ -31,7 +31,7 @@ class TaskStatusChangedListener
             'entity_id' => $event->task->id,
             'action' => 'Changed status',
             'meta' => json_encode([
-                'user_id' => $event->user_id,
+                'user_id' => $event->userId,
                 'previous_status' => $event->previousStatus,
                 'current_status' => $event->task->status->value,
             ])

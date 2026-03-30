@@ -16,15 +16,15 @@ class TaskCreatedEvent
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     public Task $task;
-    public $user_id;
+    public $userId;
 
     /**
      * Create a new event instance.
      */
-    public function __construct(Task $task, $user_id)
+    public function __construct(Task $task, $userId)
     {
         $this->task = $task;
-        $this->user_id = $user_id;
+        $this->userId = $userId;
     }
 
     /**

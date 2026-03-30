@@ -30,7 +30,7 @@ class TaskCreatedListener
             'entity_id' => $event->task->id,
             'action' => 'Created',
             'meta' => json_encode([
-                'user_id' => $event->user_id,
+                'user_id' => $event->userId,
             ])
         ]);
     }

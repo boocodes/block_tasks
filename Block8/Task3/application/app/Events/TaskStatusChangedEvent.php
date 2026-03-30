@@ -17,16 +17,16 @@ class TaskStatusChangedEvent
 
     public Task $task;
     public string $previousStatus;
-    public $user_id;
+    public $userId;
 
     /**
      * Create a new event instance.
      */
-    public function __construct(Task $task, $previousStatus, $user_id)
+    public function __construct(Task $task, $previousStatus, $userId)
     {
         $this->task = $task;
         $this->previousStatus = $previousStatus;
-        $this->user_id = $user_id;
+        $this->userId = $userId;
     }
 
     /**
