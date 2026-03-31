@@ -4,7 +4,7 @@ info:
   version: 1.0.0
 servers:
   - url: http://localhost:8000/api
-    description: Local development server
+    description: Server
 tags:
   - name: Auth
     description: 'User auth'
@@ -73,7 +73,6 @@ components:
       schema:
         type: string
         maxLength: 255
-
   schemas:
     User:
       type: object
@@ -94,7 +93,6 @@ components:
         updated_at:
           type: string
           format: date-time
-
     RegistrationRequest:
       type: object
       required:
@@ -116,7 +114,6 @@ components:
           minLength: 8
           maxLength: 128
           example: "1234567789"
-
     LoginRequest:
       type: object
       required:
@@ -130,7 +127,6 @@ components:
         password:
           type: string
           example: "123456789"
-
     AuthResponse:
       type: object
       properties:
@@ -140,7 +136,6 @@ components:
           type: string
           description: 'Bearer auth token'
           example: "1|abc123def456..."
-
     ErrorResponse:
       type: object
       properties:
@@ -153,7 +148,6 @@ components:
             type: array
             items:
               type: string
-
     Project:
       type: object
       properties:
@@ -170,7 +164,6 @@ components:
         created_at:
           type: string
           format: date-time
-
     CreateProjectRequest:
       type: object
       required:
@@ -180,7 +173,6 @@ components:
           type: string
           maxLength: 128
           example: "Project"
-
     UpdateProjectRequest:
       type: object
       required:
@@ -190,7 +182,6 @@ components:
           type: string
           maxLength: 255
           example: "Updated Project"
-
     ProjectsListResponse:
       type: object
       properties:
@@ -198,15 +189,12 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Project'
-
     TaskStatus:
       type: string
       enum: [new, in_progress, blocked, done, cancelled]
-
     Priority:
       type: string
       enum: [low, normal, high, critical]
-
     Task:
       type: object
       properties:
@@ -236,7 +224,6 @@ components:
         updated_at:
           type: string
           format: date-time
-
     CreateTaskRequest:
       type: object
       required:
@@ -266,7 +253,6 @@ components:
           type: string
           format: date-time
           example: "2026-12-31"
-
     UpdateTaskRequest:
       type: object
       properties:
@@ -283,7 +269,6 @@ components:
         due_date:
           type: string
           format: date-time
-
     TasksListResponse:
       type: object
       properties:
@@ -304,7 +289,6 @@ components:
             has_more:
               type: boolean
               example: true
-
     Comment:
       type: object
       properties:
@@ -324,7 +308,6 @@ components:
         created_at:
           type: string
           format: date-time
-
     CreateCommentRequest:
       type: object
       required:
@@ -338,7 +321,6 @@ components:
           type: string
           maxLength: 512
           example: "Body text"
-
     UpdateCommentRequest:
       type: object
       required:
@@ -348,7 +330,6 @@ components:
           type: string
           maxLength: 512
           example: "Body text"
-
     Webhook:
       type: object
       properties:
@@ -374,7 +355,6 @@ components:
         updated_at:
           type: string
           format: date-time
-
     CreateWebhookRequest:
       type: object
       required:
@@ -396,7 +376,6 @@ components:
           type: boolean
         project_id:
           type: integer
-
     UpdateWebhookRequest:
       type: object
       properties:
@@ -407,7 +386,6 @@ components:
           maxLength: 255
         enable:
           type: boolean
-
     WebhookAttempt:
       type: object
       properties:
@@ -435,7 +413,6 @@ components:
         created_at:
           type: string
           format: date-time
-
     HealthResponse:
       type: object
       properties:
@@ -448,7 +425,6 @@ components:
         timestamp:
           type: string
           format: date-time
-
     MetricsResponse:
       type: object
       properties:
@@ -459,7 +435,6 @@ components:
         total:
           type: integer
           description: 'Total requests count'
-
     WebhookPayload:
       type: object
       properties:
@@ -477,7 +452,6 @@ components:
           type: integer
         task_id:
           type: integer
-
   responses:
     Unauthorized:
       description: 'Noauthorized'
@@ -487,7 +461,6 @@ components:
             $ref: '#/components/schemas/ErrorResponse'
           example:
             message: "Unauthenticated"
-
     Forbidden:
       description: 'Forbidden'
       content:
@@ -496,7 +469,6 @@ components:
             $ref: '#/components/schemas/ErrorResponse'
           example:
             message: "Noauthorized"
-
     NotFound:
       description: 'Not found'
       content:
@@ -505,14 +477,12 @@ components:
             $ref: '#/components/schemas/ErrorResponse'
           example:
             message: "Not found"
-
     ValidationError:
       description: 'Validation error'
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorResponse'
-
 paths:
   /user/registration:
     post:
@@ -534,7 +504,6 @@ paths:
                 $ref: '#/components/schemas/AuthResponse'
         '422':
           $ref: '#/components/responses/ValidationError'
-
   /user/login:
     post:
       tags: [Auth]
@@ -559,7 +528,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-
   /user/me:
     post:
       tags: [Auth]
@@ -576,7 +544,6 @@ paths:
                 $ref: '#/components/schemas/AuthResponse'
         '401':
           $ref: '#/components/responses/Unauthorized'
-
   /user/logout:
     post:
       tags: [Auth]
@@ -610,7 +577,6 @@ paths:
               schema:
                 type: string
                 example: "Alive"
-
   /ready:
     get:
       tags: [Health]
@@ -629,7 +595,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/HealthResponse'
-
   /metrics:
     get:
       tags: [Health]
@@ -661,7 +626,6 @@ paths:
                 $ref: '#/components/schemas/ProjectsListResponse'
         '401':
           $ref: '#/components/responses/Unauthorized'
-
     post:
       tags: [Projects]
       summary: 'Project create'
@@ -683,7 +647,6 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '422':
           $ref: '#/components/responses/ValidationError'
-
   /projects/{project}:
     get:
       tags: [Projects]
@@ -708,7 +671,6 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
-
     patch:
       tags: [Projects]
       summary: 'Update project'
@@ -736,7 +698,6 @@ paths:
           $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
-
     delete:
       tags: [Projects]
       summary: 'Delete project'
@@ -758,7 +719,6 @@ paths:
           $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
-
   /tasks:
     get:
       tags: [Tasks]
@@ -787,7 +747,6 @@ paths:
                 $ref: '#/components/schemas/TasksListResponse'
         '401':
           $ref: '#/components/responses/Unauthorized'
-
     post:
       tags: [Tasks]
       summary: 'Create task'
@@ -811,7 +770,6 @@ paths:
           $ref: '#/components/responses/Forbidden'
         '422':
           $ref: '#/components/responses/ValidationError'
-
   /tasks/{task}:
     get:
       tags: [Tasks]
@@ -838,7 +796,6 @@ paths:
           $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
-
     patch:
       tags: [Tasks]
       summary: 'Update task'
@@ -869,7 +826,6 @@ paths:
           $ref: '#/components/responses/NotFound'
         '422':
           $ref: '#/components/responses/ValidationError'
-
     delete:
       tags: [Tasks]
       summary: 'Delete task'
@@ -915,7 +871,6 @@ paths:
                       $ref: '#/components/schemas/Comment'
         '401':
           $ref: '#/components/responses/Unauthorized'
-
     post:
       tags: [Comments]
       summary: 'Create comment'
@@ -937,7 +892,6 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '422':
           $ref: '#/components/responses/ValidationError'
-
   /comments/{comment}:
     get:
       tags: [Comments]
@@ -962,7 +916,6 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
-
     patch:
       tags: [Comments]
       summary: 'Update comment'
@@ -990,7 +943,6 @@ paths:
           $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
-
     delete:
       tags: [Comments]
       summary: 'Delete comment'
@@ -1033,7 +985,6 @@ paths:
                       $ref: '#/components/schemas/Webhook'
         '401':
           $ref: '#/components/responses/Unauthorized'
-
     post:
       tags: [Webhooks]
       summary: 'Create weebhook'
@@ -1055,7 +1006,6 @@ paths:
           $ref: '#/components/responses/Forbidden'
         '422':
           $ref: '#/components/responses/ValidationError'
-
   /webhook/{webhookId}:
     get:
       tags: [Webhooks]
@@ -1082,7 +1032,6 @@ paths:
           $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
-
     patch:
       tags: [Webhooks]
       summary: 'Update webhook'
@@ -1110,7 +1059,6 @@ paths:
           $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
-
     delete:
       tags: [Webhooks]
       summary: 'Delete webhook'
@@ -1158,7 +1106,6 @@ x-webhooks:
           description: 'Webhook success'
         '500':
           description: 'Webhook error'
-
   task.status_changed:
     description: 'Send after task status change'
     post:

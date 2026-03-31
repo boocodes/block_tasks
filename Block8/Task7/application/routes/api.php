@@ -21,29 +21,26 @@ Route::get('/health', function (Request $request) {
 
 Route::get('/metrics', function (Request $request) {
     $metrics = Metrics::query()->orderBy('id')->get();
-    
+
     $averageTime = $metrics->avg('timeDuration');
 
     return response(['average' => $averageTime, 'total' => $metrics->count()], 200);
 });
 
 Route::get('/ready', function (Request $request) {
-    try
-    {
+    try {
         $result = DB::select('SELECT 1 as connected');
         return response()->json([
             'status' => 'ready',
             'database' => 'connected',
             'timestamp' => new \DateTimeImmutable()->format('c'),
         ], 200);
-    }
-    catch(\Exception $exception)
-    {
+    } catch (\Exception $exception) {
         return response()->json([
             'status' => 'not ready',
             'database' => 'disconnected',
             'timestamp' => new \DateTimeImmutable()->format('c'),
-        ], 500);   
+        ], 500);
         throw $exception;
     }
 });
