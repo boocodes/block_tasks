@@ -75,7 +75,6 @@ components:
         maxLength: 255
 
   schemas:
-    # Auth
     User:
       type: object
       properties:
@@ -155,7 +154,6 @@ components:
             items:
               type: string
 
-    # Project
     Project:
       type: object
       properties:
@@ -201,7 +199,6 @@ components:
           items:
             $ref: '#/components/schemas/Project'
 
-    # Task
     TaskStatus:
       type: string
       enum: [new, in_progress, blocked, done, cancelled]
@@ -308,7 +305,6 @@ components:
               type: boolean
               example: true
 
-    # Comment
     Comment:
       type: object
       properties:
@@ -353,7 +349,6 @@ components:
           maxLength: 512
           example: "Body text"
 
-    # Webhook
     Webhook:
       type: object
       properties:
@@ -441,7 +436,6 @@ components:
           type: string
           format: date-time
 
-    # Health & Metrics
     HealthResponse:
       type: object
       properties:
@@ -466,7 +460,6 @@ components:
           type: integer
           description: 'Total requests count'
 
-    # Webhook Delivery Payload
     WebhookPayload:
       type: object
       properties:
@@ -521,7 +514,6 @@ components:
             $ref: '#/components/schemas/ErrorResponse'
 
 paths:
-  # Auth endpoints
   /user/registration:
     post:
       tags: [Auth]
@@ -605,8 +597,6 @@ paths:
                     example: "Logout"
         '401':
           $ref: '#/components/responses/Unauthorized'
-
-  # Health endpoints
   /health:
     get:
       tags: [Health]
@@ -652,8 +642,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/MetricsResponse'
-
-  # Projects
   /projects:
     get:
       tags: [Projects]
@@ -771,7 +759,6 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  # Tasks
   /tasks:
     get:
       tags: [Tasks]
@@ -904,8 +891,6 @@ paths:
           $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
-
-  # Comments
   /comments:
     get:
       tags: [Comments]
@@ -1027,8 +1012,6 @@ paths:
           $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
-
-  # Webhooks
   /webhook:
     get:
       tags: [Webhooks]
@@ -1149,8 +1132,6 @@ paths:
           $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
-
-# Webhook delivery specification
 x-webhooks:
   task.completed:
     description: 'Send after complete an task'
