@@ -1,0 +1,1205 @@
+openapi: 3.0.0
+info:
+  title: CRUD
+  version: 1.0.0
+servers:
+  - url: http://localhost:8000/api
+    description: Local development server
+tags:
+  - name: Auth
+    description: 'User auth'
+  - name: Projects
+    description: 'Projects crud'
+  - name: Tasks
+    description: 'Tasks crud'
+  - name: Comments
+    description: 'Comments crud'
+  - name: Webhooks
+    description: 'Webhook crud'
+  - name: Health
+    description: 'Check health and metrics'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: 'Auth token'
+
+  parameters:
+    IdempotencyKeyHeader:
+      name: Idempotency-Key
+      in: header
+      description: 'Unqiue key for prevent multi requests'
+      schema:
+        type: string
+        maxLength: 255
+      required: false
+    LimitParam:
+      name: limit
+      in: query
+      description: 'Limit tasks per request'
+      schema:
+        type: integer
+        default: 10
+        minimum: 1
+        maximum: 100
+    CursorParam:
+      name: cursor
+      in: query
+      description: 'Keyset cursor pagination'
+      schema:
+        type: integer
+      required: false
+    StatusParam:
+      name: status
+      in: query
+      description: 'Task status filter'
+      schema:
+        type: string
+        enum: [new, in_progress, blocked, done, cancelled]
+    PriorityParam:
+      name: priority
+      in: query
+      description: 'Task priority filter'
+      schema:
+        type: string
+        enum: [low, normal, high, critical]
+    SearchParam:
+      name: search
+      in: query
+      description: 'Task title filter'
+      schema:
+        type: string
+        maxLength: 255
+
+  schemas:
+    # Auth
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: 'Name'
+        email:
+          type: string
+          format: email
+          example: "example@mail.ru"
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    RegistrationRequest:
+      type: object
+      required:
+        - name
+        - email
+        - password
+      properties:
+        name:
+          type: string
+          maxLength: 255
+          example: "Name name"
+        email:
+          type: string
+          format: email
+          maxLength: 255
+          example: "example@mail.ru"
+        password:
+          type: string
+          minLength: 8
+          maxLength: 128
+          example: "1234567789"
+
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          example: "example@mail.ru"
+        password:
+          type: string
+          example: "123456789"
+
+    AuthResponse:
+      type: object
+      properties:
+        user:
+          $ref: '#/components/schemas/User'
+        token:
+          type: string
+          description: 'Bearer auth token'
+          example: "1|abc123def456..."
+
+    ErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "Validation error"
+        errors:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
+
+    # Project
+    Project:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          maxLength: 128
+          example: "Project"
+        owner_id:
+          type: integer
+          example: 1
+        created_at:
+          type: string
+          format: date-time
+
+    CreateProjectRequest:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          maxLength: 128
+          example: "Project"
+
+    UpdateProjectRequest:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          maxLength: 255
+          example: "Updated Project"
+
+    ProjectsListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Project'
+
+    # Task
+    TaskStatus:
+      type: string
+      enum: [new, in_progress, blocked, done, cancelled]
+
+    Priority:
+      type: string
+      enum: [low, normal, high, critical]
+
+    Task:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        project_id:
+          type: integer
+          example: 1
+        title:
+          type: string
+          maxLength: 255
+          example: "Title"
+        description:
+          type: string
+          example: "Description"
+        status:
+          $ref: '#/components/schemas/TaskStatus'
+        priority:
+          $ref: '#/components/schemas/Priority'
+        due_date:
+          type: string
+          format: date-time
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    CreateTaskRequest:
+      type: object
+      required:
+        - project_id
+        - title
+        - description
+        - status
+        - priority
+        - due_date
+      properties:
+        project_id:
+          type: integer
+          example: 1
+        title:
+          type: string
+          maxLength: 255
+          example: "Title"
+        description:
+          type: string
+          maxLength: 255
+          example: "Description"
+        status:
+          $ref: '#/components/schemas/TaskStatus'
+        priority:
+          $ref: '#/components/schemas/Priority'
+        due_date:
+          type: string
+          format: date-time
+          example: "2026-12-31"
+
+    UpdateTaskRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          maxLength: 255
+        description:
+          type: string
+          maxLength: 255
+        status:
+          $ref: '#/components/schemas/TaskStatus'
+        priority:
+          $ref: '#/components/schemas/Priority'
+        due_date:
+          type: string
+          format: date-time
+
+    TasksListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Task'
+        meta:
+          type: object
+          properties:
+            limit:
+              type: integer
+              example: 10
+            next_cursor:
+              type: integer
+              nullable: true
+              example: 10
+            has_more:
+              type: boolean
+              example: true
+
+    # Comment
+    Comment:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        task_id:
+          type: integer
+          example: 1
+        user_id:
+          type: integer
+          example: 1
+        body:
+          type: string
+          maxLength: 512
+          example: "Body text"
+        created_at:
+          type: string
+          format: date-time
+
+    CreateCommentRequest:
+      type: object
+      required:
+        - task_id
+        - body
+      properties:
+        task_id:
+          type: integer
+          example: 1
+        body:
+          type: string
+          maxLength: 512
+          example: "Body text"
+
+    UpdateCommentRequest:
+      type: object
+      required:
+        - body
+      properties:
+        body:
+          type: string
+          maxLength: 512
+          example: "Body text"
+
+    # Webhook
+    Webhook:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        project_id:
+          type: integer
+          example: 1
+        url:
+          type: string
+          format: uri
+          example: "https://localhost:8001/webhook-reciever"
+        secret:
+          type: string
+          example: "secret-key"
+        enable:
+          type: boolean
+          default: true
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    CreateWebhookRequest:
+      type: object
+      required:
+        - url
+        - secret
+        - enable
+        - project_id
+      properties:
+        url:
+          type: string
+          format: uri
+          minLength: 8
+          maxLength: 255
+        secret:
+          type: string
+          minLength: 8
+          maxLength: 255
+        enable:
+          type: boolean
+        project_id:
+          type: integer
+
+    UpdateWebhookRequest:
+      type: object
+      properties:
+        url:
+          type: string
+          format: uri
+          minLength: 8
+          maxLength: 255
+        enable:
+          type: boolean
+
+    WebhookAttempt:
+      type: object
+      properties:
+        id:
+          type: integer
+        webhook_id:
+          type: integer
+        event_type:
+          type: string
+          enum: [Completed, Changed status]
+        status:
+          type: string
+          enum: [pending, success, failed]
+        http_code:
+          type: integer
+          nullable: true
+        response_time:
+          type: integer
+          nullable: true
+        error:
+          type: string
+          nullable: true
+        attempt:
+          type: integer
+        created_at:
+          type: string
+          format: date-time
+
+    # Health & Metrics
+    HealthResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [ready, not ready]
+        database:
+          type: string
+          enum: [connected, disconnected]
+        timestamp:
+          type: string
+          format: date-time
+
+    MetricsResponse:
+      type: object
+      properties:
+        average:
+          type: number
+          format: float
+          description: 'Average response time millseconds'
+        total:
+          type: integer
+          description: 'Total requests count'
+
+    # Webhook Delivery Payload
+    WebhookPayload:
+      type: object
+      properties:
+        event:
+          type: string
+          enum: [Completed, Changed status]
+        timestamp:
+          type: string
+          format: date-time
+        idempotency_key:
+          type: string
+        webhook_id:
+          type: integer
+        project_id:
+          type: integer
+        task_id:
+          type: integer
+
+  responses:
+    Unauthorized:
+      description: 'Noauthorized'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            message: "Unauthenticated"
+
+    Forbidden:
+      description: 'Forbidden'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            message: "Noauthorized"
+
+    NotFound:
+      description: 'Not found'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            message: "Not found"
+
+    ValidationError:
+      description: 'Validation error'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+paths:
+  # Auth endpoints
+  /user/registration:
+    post:
+      tags: [Auth]
+      summary: 'Registration new user'
+      operationId: register
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegistrationRequest'
+      responses:
+        '201':
+          description: 'Success registration'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+  /user/login:
+    post:
+      tags: [Auth]
+      summary: 'Entry app'
+      operationId: login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: 'Success entry'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '422':
+          description: 'Wrong email or password'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /user/me:
+    post:
+      tags: [Auth]
+      summary: 'Get auth user'
+      operationId: me
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: 'Success'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /user/logout:
+    post:
+      tags: [Auth]
+      summary: 'Logout'
+      operationId: logout
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: 'Success logout'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Logout"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # Health endpoints
+  /health:
+    get:
+      tags: [Health]
+      summary: 'Check health'
+      operationId: health
+      responses:
+        '200':
+          description: 'Alive'
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "Alive"
+
+  /ready:
+    get:
+      tags: [Health]
+      summary: 'Check ready'
+      operationId: ready
+      responses:
+        '200':
+          description: 'Service ready'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+        '500':
+          description: 'Database not ready'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+
+  /metrics:
+    get:
+      tags: [Health]
+      summary: 'Requests metrics'
+      operationId: metrics
+      responses:
+        '200':
+          description: 'Success'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MetricsResponse'
+
+  # Projects
+  /projects:
+    get:
+      tags: [Projects]
+      summary: 'Projects lists get'
+      operationId: getProjects
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/LimitParam'
+        - $ref: '#/components/parameters/CursorParam'
+      responses:
+        '200':
+          description: 'Success'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectsListResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    post:
+      tags: [Projects]
+      summary: 'Project create'
+      operationId: createProject
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKeyHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateProjectRequest'
+      responses:
+        '201':
+          description: 'Success created'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+  /projects/{project}:
+    get:
+      tags: [Projects]
+      summary: 'Get project by id'
+      operationId: getProject
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: project
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 'Success'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Project'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    patch:
+      tags: [Projects]
+      summary: 'Update project'
+      operationId: updateProject
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: project
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateProjectRequest'
+      responses:
+        '200':
+          description: 'Success updated'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    delete:
+      tags: [Projects]
+      summary: 'Delete project'
+      operationId: deleteProject
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: project
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: 'Success deleted'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # Tasks
+  /tasks:
+    get:
+      tags: [Tasks]
+      summary: 'Get tasks list'
+      operationId: getTasks
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/LimitParam'
+        - $ref: '#/components/parameters/CursorParam'
+        - $ref: '#/components/parameters/StatusParam'
+        - $ref: '#/components/parameters/PriorityParam'
+        - $ref: '#/components/parameters/SearchParam'
+        - name: due_date
+          in: query
+          description: 'Task list by filter'
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: 'Success'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TasksListResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    post:
+      tags: [Tasks]
+      summary: 'Create task'
+      operationId: createTask
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKeyHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTaskRequest'
+      responses:
+        '201':
+          description: 'Success created'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+  /tasks/{task}:
+    get:
+      tags: [Tasks]
+      summary: 'Get task by id'
+      operationId: getTask
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: task
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 'Success'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    patch:
+      tags: [Tasks]
+      summary: 'Update task'
+      operationId: updateTask
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: task
+          in: path
+          required: true
+          schema:
+            type: integer
+        - $ref: '#/components/parameters/IdempotencyKeyHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateTaskRequest'
+      responses:
+        '200':
+          description: 'Success updated'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+    delete:
+      tags: [Tasks]
+      summary: 'Delete task'
+      operationId: deleteTask
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: task
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: 'Success deleted'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # Comments
+  /comments:
+    get:
+      tags: [Comments]
+      summary: 'Get comments list'
+      operationId: getComments
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/LimitParam'
+        - $ref: '#/components/parameters/CursorParam'
+      responses:
+        '200':
+          description: 'Success'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Comment'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    post:
+      tags: [Comments]
+      summary: 'Create comment'
+      operationId: createComment
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKeyHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCommentRequest'
+      responses:
+        '201':
+          description: 'Comment created'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+  /comments/{comment}:
+    get:
+      tags: [Comments]
+      summary: 'Get comment by id'
+      operationId: getComment
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: comment
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 'Success'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Comment'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    patch:
+      tags: [Comments]
+      summary: 'Update comment'
+      operationId: updateComment
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: comment
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCommentRequest'
+      responses:
+        '200':
+          description: 'Comment updated'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    delete:
+      tags: [Comments]
+      summary: 'Delete comment'
+      operationId: deleteComment
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: comment
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: 'Comment deleted'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # Webhooks
+  /webhook:
+    get:
+      tags: [Webhooks]
+      summary: 'Get webhooks list'
+      operationId: getWebhooks
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: 'Success'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Webhook'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    post:
+      tags: [Webhooks]
+      summary: 'Create weebhook'
+      operationId: createWebhook
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateWebhookRequest'
+      responses:
+        '201':
+          description: 'Webhook created'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+  /webhook/{webhookId}:
+    get:
+      tags: [Webhooks]
+      summary: 'Get webhook by id'
+      operationId: getWebhook
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: webhookId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 'Successs'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Webhook'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    patch:
+      tags: [Webhooks]
+      summary: 'Update webhook'
+      operationId: updateWebhook
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: webhookId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateWebhookRequest'
+      responses:
+        '200':
+          description: 'Webhook updated'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    delete:
+      tags: [Webhooks]
+      summary: 'Delete webhook'
+      operationId: deleteWebhook
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: webhookId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: 'Webhook deleted'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+# Webhook delivery specification
+x-webhooks:
+  task.completed:
+    description: 'Send after complete an task'
+    post:
+      summary: 'Webhook for complete task'
+      operationId: webhookTaskCompleted
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WebhookPayload'
+            examples:
+              completed:
+                value:
+                  event: "Completed"
+                  timestamp: "2026-03-31"
+                  idempotency_key: "task_1_user_fsdfsdf"
+                  webhook_id: 1
+                  project_id: 1
+                  task_id: 1
+      responses:
+        '200':
+          description: 'Webhook success'
+        '500':
+          description: 'Webhook error'
+
+  task.status_changed:
+    description: 'Send after task status change'
+    post:
+      summary: 'Webhook for task status change'
+      operationId: webhookTaskStatusChanged
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WebhookPayload'
+            examples:
+              status_changed:
+                value:
+                  event: "Changed status"
+                  timestamp: "2026-03-31T10:00:00Z"
+                  idempotency_key: "task_1_user_1_1743415200"
+                  webhook_id: 1
+                  project_id: 1
+                  task_id: 1
+      responses:
+        '200':
+          description: 'Wehbook success'
+        '500':
+          description: 'Webhook error'
