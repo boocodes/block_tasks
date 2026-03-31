@@ -4,6 +4,8 @@ namespace Final6\App\Policies\Comment;
 
 use Final6\App\Models\User;
 use Final6\App\Models\Comment;
+use Final6\App\Models\Project;
+use Final6\App\Models\Task;
 
 class CommentPolicy
 {
@@ -13,7 +15,17 @@ class CommentPolicy
     }
     public function view(User $user, Comment $comment): bool
     {
-        return true;
+        $task = Task::find($comment->task_id);
+        if(!$task)
+            {
+                return false;
+            }
+        $project = Project::find($task->project_id);
+        if(!$project)
+            {
+                return false;
+            }
+        return $project->owner_id === $user->id;
     }
     public function create(User $user): bool
     {
