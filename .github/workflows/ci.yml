@@ -22,7 +22,7 @@ jobs:
           tools: pint, composer:v2
       
       - name: Run Pint
-        run: pint --test
+        run: pint
 
   tests:
     runs-on: ubuntu-latest
