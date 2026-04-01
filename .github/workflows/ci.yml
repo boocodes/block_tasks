@@ -112,6 +112,39 @@ jobs:
             echo "Attempt $i: webhook-receiver not ready"
             sleep 2
           done
+      - name: Test webhook-receiver endpoint
+        run: |
+          echo "Testing webhook-receiver endpoint..."
+          
+          # Тест 1: Проверка доступности
+          echo "Test 1: Checking availability..."
+          if curl -s -f http://localhost:8081/ > /dev/null 2>&1; then
+            echo "Webhook is accessible"
+          else
+            echo "Webhook is not accessible"
+            exit 1
+          fi
+          
+          echo "Test 2: Testing with valid signature"
+          PAYLOAD='{"event":"test","status":"ok"}'
+          SIGNATURE=$(echo -n "$PAYLOAD" | openssl dgst -sha256 -hmac "secret-test" | awk '{print $2}')
+          
+          RESPONSE=$(curl -s -w "\n%{http_code}" -X POST http://localhost:8081/ \
+            -H "Content-Type: application/json" \
+            -H "X-Webhook-Signature: $SIGNATURE" \
+            -d "$PAYLOAD")
+          
+          HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
+          BODY=$(echo "$RESPONSE" | sed '$d')
+          
+          if [ "$HTTP_CODE" = "200" ]; then
+            echo "Valid signature test passed (HTTP $HTTP_CODE)"
+            echo "Response: $BODY"
+          else
+            echo "Valid signature test failed (HTTP $HTTP_CODE)"
+            echo "Response: $BODY"
+            exit 1
+          fi
       - name: Migrations
         run: php artisan migrate --seed
         env: 
