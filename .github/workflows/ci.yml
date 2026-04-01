@@ -39,10 +39,6 @@ jobs:
           - 6379:6379
         options:
           --health-cmd="redis-cli ping"
-      webhook-receiver:
-        image: docker:latest
-        ports:
-          - 8081:81
     steps:
       - name: Checkout mode
         uses: actions/checkout@v4
@@ -91,14 +87,20 @@ jobs:
       - name: Clear config cache
         run: php artisan config:clear
 
-      - name: Build webhook-receiver
+      - name: Build and run webhook-receiver
         run: |
-          if [ -d "/webhook-receiver" ]; then
-            docker build -t webhook-receiver:latest ./webhook-receiver
-            docker run -d --name webhook-receiver-container -p 8081:81 webhook-receiver:latest
-          else
-            docker run -d --name webhook-receiver-container -p 8081:81 -e PORT=81 medhak/http-https-echo:latest
-          fi
+          docker stop webhook-receiver-container 2>/dev/null || true
+          docker rm webhook-receiver-container 2>/dev/null || true
+          
+          echo "Building webhook-receiver from ./webhook-receiver..."
+          docker build -t webhook-receiver:latest ./webhook-receiver
+          
+          docker run -d \
+            --name webhook-receiver-container \
+            -p 8081:81 \
+            webhook-receiver:latest
+          
+          echo "Webhook-receiver container started"
       - name: Wait for webhook-receiver
         run: |
           echo "Waiting for webhook-receiver to be ready"
