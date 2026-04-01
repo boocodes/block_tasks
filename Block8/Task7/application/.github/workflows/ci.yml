@@ -1,9 +1,9 @@
 name: CRUD
 on: 
   push:
-    branches: [deploy]
+    branches: [deploy.v2]
   pull_request:
-    branches: [deploy]
+    branches: [deploy.v2]
 
 jobs:
   lint:
@@ -17,9 +17,10 @@ jobs:
         uses: shivammathur/setup-php@v2
         with: 
           php-version: '8.5'
-          tools: pint
+          extensions: mbstring, pdo_mysql, redis, zip, gd
+          tools: pint, composer:v2
       - name: Run Pint
-        run: pint 
+        run: pint
   tests:
     runs-on: ubuntu-latest
     needs: lint
@@ -32,30 +33,105 @@ jobs:
         ports:
           - 3306:3306
         options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options:
+          --health-cmd="redis-cli ping"
+      webhook-receiver:
+        image: docker:latest
+        ports:
+          - 8081:81
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout mode
+        uses: actions/checkout@v4
+
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with: 
           php-version: '8.5'
+          extensions: mbstring, pdo_mysql, redis, zip, gd, pcntl
+          tools: composer:v2
+
       - name: Copy .env
         run: cp .env.example .env
+
       - name: Install dependecies
         run: composer install --no-progress --no-suggest --prefer-dist
+
       - name: Install MySQL Client
         run: sudo apt-get update && sudo apt-get install -y mysql-client
+
       - name: Wait for MySQL ready
         run: |
           until mysqladmin ping -h 127.0.0.1 -uroot -proot --silent; do 
           echo "Waiting for MySQL"
           sleep 5
           done
+      - name: Wait for Redis ready
+        run: |
+          echo "Waitng for redis to be ready"
+          until redis-cli -h 127.0.0.1 ping; do
+            echo "Redis is not ready"
+            sleep 3
+          done
+          echo "Redis ready to work"
+        
       - name: Key generate
         run: php artisan key:generate
-      - name: Config cache
-        run: php artisan config:cache
+
+      - name: Create storage link
+        run: php artisan storage:link
+
+      - name: Clear config cache
+        run: php artisan config:clear
+
+      - name: Build webhook-receiver
+        run: |
+          if [ -d "/webhook-receiver" ]; then
+            docker build -t webhook-receiver:latest ./webhook-receiver
+            docker run -d --name webhook-receiver-container -p 8081:81 \
+              webhook-receiver:latest
+          else
+            docker run -d --name webhook-receiver-container -p 8081:81 \ 
+              -e PORT=81 \
+              medhak/http-https-echo:latest
+          fi
+      - name: Wait for webhook-receiver
+        run: |
+          echo "Waiting for webhook-receiver to be ready"
+          for i in {1..30}; do
+            if curl -s -f http://localhost:8081/health > /dev/null 2>&1; then
+              echo "webhook-receiver is ready!"
+              break
+            fi
+            echo "Attempt $i: webhook-receiver not ready"
+            sleep 2
+          done
       - name: Migrations
         run: php artisan migrate --seed
+        env: 
+          DB_HOST: 127.0.0.1
+          DB_DATABASE: application
+          DB_USERNAME: root
+          DB_PASSWORD: root
+          DB_PORT: 3306
+          REDIS_HOST: 127.0.0.1
+          REDIS_PORT: 6379
+          QUEUE_CONNECTION: redis
+      
       - name : tests
         run: php artisan test
+        env: 
+          DB_HOST: 127.0.0.1
+          DB_DATABASE: application
+          DB_USERNAME: root
+          DB_PASSWORD: root
+          DB_PORT: 3306
+          REDIS_HOST: 127.0.0.1
+          REDIS_PORT: 6379
+          QUEUE_CONNECTION: redis
+          APP_ENV: testing
+      
           
