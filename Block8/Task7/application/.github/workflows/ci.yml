@@ -69,6 +69,10 @@ jobs:
           echo "Waiting for MySQL"
           sleep 5
           done
+      - name: Intall Redis tool
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y redis-tools
       - name: Wait for Redis ready
         run: |
           echo "Waitng for redis to be ready"
