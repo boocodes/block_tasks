@@ -95,12 +95,9 @@ jobs:
         run: |
           if [ -d "/webhook-receiver" ]; then
             docker build -t webhook-receiver:latest ./webhook-receiver
-            docker run -d --name webhook-receiver-container -p 8081:81 \
-              webhook-receiver:latest
+            docker run -d --name webhook-receiver-container -p 8081:81 webhook-receiver:latest
           else
-            docker run -d --name webhook-receiver-container -p 8081:81 \ 
-              -e PORT=81 \
-              medhak/http-https-echo:latest
+            docker run -d --name webhook-receiver-container -p 8081:81 -e PORT=81 medhak/http-https-echo:latest
           fi
       - name: Wait for webhook-receiver
         run: |
