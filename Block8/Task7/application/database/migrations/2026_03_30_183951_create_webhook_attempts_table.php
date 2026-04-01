@@ -28,7 +28,7 @@ return new class extends Migration
             $table->timestamp('executed_at')->nullable();
             $table->foreign('webhook_id')->references('id')->on('webhooks');
             
-            $table->unique(['idempotency_key', 'event_type', 'webhook_id'], 'webhook_attempts_unieque');
+            $table->unique(['idempotency_key', 'event_type', 'webhook_id', 'attempt'], 'webhook_attempts_unieque');
         });
     }
 

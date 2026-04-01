@@ -18,6 +18,7 @@
         </include>
     </source>
     <php>
+        <env name="QUEUE_BACKOFF" value="[0,0,0]"/>
         <env name="QUEUE_CONNECTION" value="sync"/>
     </php>
 </phpunit>

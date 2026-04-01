@@ -2,7 +2,6 @@
 
 namespace Final7\App\Jobs;
 
-use Final7\App\Models\Project;
 use Final7\App\Models\Task;
 use Final7\App\Models\Webhook;
 use Final7\App\Models\WebhookAttempts;
@@ -19,7 +18,6 @@ class WebhookJob implements ShouldQueue
 {
     use Queueable, Dispatchable, SerializesModels, InteractsWithQueue;
 
-
     public Task $task;
     public string $idempotencyKey;
     public string $event;
@@ -29,12 +27,24 @@ class WebhookJob implements ShouldQueue
 
     public function backoff(): array
     {
+        if (app()->environment('testing')) {
+            return [0, 0, 0];
+        }
         return [1, 3, 5];
     }
-    public function failed(\Throwable $exception): void {}
-    /**
-     * Create a new job instance.
-     */
+
+    public function failed(\Throwable $exception): void
+    {
+        Log::error('Webhook job permanently failed', [
+            'webhook_id' => $this->webhook->id,
+            'task_id' => $this->task->id,
+            'idempotency_key' => $this->idempotencyKey,
+            'event' => $this->event,
+            'attempts' => $this->attempts(),
+            'error' => $exception->getMessage(),
+        ]);
+    }
+
     public function __construct(Webhook $webhook, Task $task, string $idempotencyKey, string $event)
     {
         $this->webhook = $webhook;
@@ -48,9 +58,15 @@ class WebhookJob implements ShouldQueue
         return hash_hmac('sha256', $payload, $this->webhook->secret);
     }
 
+    private function isClientError(int $httpCode): bool
+    {
+        return in_array($httpCode, [400, 401, 403, 404, 422]);
+    }
+
     private function execHook(array $payloadData, WebhookAttempts $attempt, int $attemptCurrentCount)
     {
         $startTime = microtime(true);
+
         try {
             $response = Http::timeout(10)
                 ->withHeaders([
@@ -60,15 +76,34 @@ class WebhookJob implements ShouldQueue
                 ])
                 ->post($this->webhook->url, $payloadData);
 
+            $httpCode = $response->status();
+            $isSuccessful = $response->successful();
+
             $attempt->update([
-                'status' => $response->successful() ? 'success' : 'failed',
+                'status' => $isSuccessful ? 'success' : 'failed',
                 'attempt' => $attemptCurrentCount,
-                'http_code' => $response->status(),
-                'response_time' =>  (int)((microtime(true) - $startTime) * 1000),
+                'http_code' => $httpCode,
+                'response_time' => (int)((microtime(true) - $startTime) * 1000),
                 'executed_at' => new \DateTimeImmutable()->format('c'),
+                'error' => $isSuccessful ? null : ('HTTP ' . $httpCode),
             ]);
+
+            if ($isSuccessful) {
+                WebhookProcessed::create([
+                    'webhook_id' => $this->webhook->id,
+                    'webhook_attempt_id' => $attempt->id,
+                ]);
+                return;
+            }
+            if ($this->isClientError($httpCode)) {
+                $this->fail(new \Exception('Client error: HTTP ' . $httpCode));
+                return;
+            }
+
+            throw new \Exception('Server error: HTTP ' . $httpCode);
         } catch (\Exception $exception) {
             $responseTimeMs = (int)((microtime(true) - $startTime) * 1000);
+
             $attempt->update([
                 'status' => 'failed',
                 'attempt' => $attemptCurrentCount,
@@ -76,13 +111,20 @@ class WebhookJob implements ShouldQueue
                 'error' => $exception->getMessage(),
                 'executed_at' => new \DateTimeImmutable()->format('c'),
             ]);
+
+            Log::warning('Webhook attempt failed', [
+                'attempt' => $attemptCurrentCount,
+                'max_attempts' => $this->tries,
+                'error' => $exception->getMessage(),
+            ]);
+
+            if ($attemptCurrentCount >= $this->tries) {
+                throw $exception;
+            }
             throw $exception;
         }
     }
 
-    /**
-     * Execute the job.
-     */
     public function handle(): void
     {
         $payloadData = [
@@ -93,15 +135,29 @@ class WebhookJob implements ShouldQueue
             'project_id' => $this->webhook->project_id,
             'task_id' => $this->task->id,
         ];
-        $attemptCurrentCount = 0;
+
         $attempt = WebhookAttempts::where('idempotency_key', $this->idempotencyKey)
-            ->where('webhook_id', $this->webhook->id)->first();
+            ->where('webhook_id', $this->webhook->id)
+            ->first();
+
         if ($attempt) {
             if ($attempt->status === 'success') {
                 return;
             }
-            $attemptCurrentCount = $attempt->attempt;
+            if ($attempt->attempt >= $this->tries) {
+                $attempt->update([
+                    'status' => 'failed',
+                    'error' => 'Max attempts exceeded'
+                ]);
+                $this->fail(new \Exception('Max attempts exceeded'));
+                return;
+            }
+
+            $attemptCurrentCount = $attempt->attempt + 1;
+            $attempt->update(['attempt' => $attemptCurrentCount]);
+            $attempt->attempt = $attemptCurrentCount;
         } else {
+            $attemptCurrentCount = 1;
             $attempt = WebhookAttempts::create([
                 'attempt' => 1,
                 'status' => 'pending',
@@ -112,13 +168,8 @@ class WebhookJob implements ShouldQueue
                 'max_attempts' => $this->tries,
                 'scheduled_at' => new \DateTimeImmutable()->format('c')
             ]);
-            $attemptCurrentCount = 1;
         }
 
-        if ($attempt->attempt > $this->tries) {
-            return;
-        }
-
-        $execHookResult = $this->execHook($payloadData, $attempt, $attemptCurrentCount);
+        $this->execHook($payloadData, $attempt, $attemptCurrentCount);
     }
 }

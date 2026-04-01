@@ -10,6 +10,7 @@ use Final7\App\Models\Project;
 use Final7\App\Models\Task;
 use Final7\App\Models\User;
 use Final7\App\Models\Webhook;
+use Final7\App\Models\WebhookAttempts;
 use Final7\App\Models\WebhookProcessed;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
@@ -18,7 +19,7 @@ use Laravel\Sanctum\Sanctum;
 use Tests7\TestCase;
 
 
-class WebhookSuccessTest extends TestCase
+class WebhookFailedTest extends TestCase
 {
     use RefreshDatabase;
     protected string $webhookUrl = "http://webhook-receiver:81";
@@ -39,7 +40,7 @@ class WebhookSuccessTest extends TestCase
             'project_id' => $project->id,
             'url' => $this->webhookUrl,
             'enable' => true,
-            'secret' => 'secret-test',
+            'secret' => 'WRONG-SECRET',
         ]);
 
         $task = Task::create([
@@ -51,19 +52,19 @@ class WebhookSuccessTest extends TestCase
             'due_date' => '2025-12-31',
         ]);
 
-        $payload = json_encode([
-            'name' => 'test'
-        ]);
-        $signature = hash_hmac('sha256', $payload, $webhook->secret);
         $response = $this
             ->patchJson('/api/tasks/' . $task->id, [
                 'status' => TaskStatus::DONE->value,
             ]);
-        $response->assertStatus(200);
-    
+        $response->assertStatus(500);
+
+
 
         $webhookSuccessProcessed = WebhookProcessed::where('webhook_id', $webhook->id)->first();
 
-        $this->assertNotNull($webhookSuccessProcessed);
+        $this->assertNull($webhookSuccessProcessed);
+
+        $webhookAttempts = WebhookAttempts::where('webhook_id', $webhook->id)->first();
+        $this->assertNotNull($webhookAttempts);
     }
 }

@@ -12,6 +12,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Redis;
 
 class TaskCompletedNotifyJob implements ShouldQueue
 {
@@ -35,21 +36,35 @@ class TaskCompletedNotifyJob implements ShouldQueue
 
     private function checkIsAlreadyProcessed(): bool
     {
-        return ProcessedJobs::where('idempotency_key', $this->idempotencyKey)->exists();
+        $key = "processed_job:{$this->idempotencyKey}";
+        return Redis::exists($key);
+    }
+
+    public function markAsProcessed(): void
+    {
+        $key = "processed_jobs:{$this->idempotencyKey}";
+        $data = [
+            'idempotency_key' => $this->idempotencyKey,
+            'task_id' => $this->task->id,
+            'user_id' => $this->userId,
+            'processed_at' => new \DateTimeImmutable()->format('c')
+        ];
+        Redis::setex($key, 86400, json_encode($data));
     }
 
     private function saveNotification(): void
     {
-        $logPath = storage_path('var/notification.log');
+        $logPath = storage_path('/var/notifications.log');
         $logDir = dirname($logPath);
         if (!file_exists($logDir)) {
-            mkdir($logDir, 0775, true);
+            mkdir($logDir, 0755, true);
         }
         $logData = [
             'occured_at' => new \DateTimeImmutable()->format('c'),
-            'message' => 'Task successfully completed',
+            'message' => 'Task completed',
             'idempotency_key' => $this->idempotencyKey,
             'user_id' => $this->userId,
+            'task_id' => $this->task->id,
         ];
         $logLine = json_encode($logData, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) . PHP_EOL;
         file_put_contents($logPath, $logLine, FILE_APPEND | LOCK_EX);
@@ -61,17 +76,35 @@ class TaskCompletedNotifyJob implements ShouldQueue
      */
     public function handle(): void
     {
-        //throw new \Exception('test');
-        if ($this->checkIsAlreadyProcessed()) {
-            return;
-        } else {
-            DB::transaction(function () {
-                ProcessedJobs::create([
+        try {
+            if ($this->checkIsAlreadyProcessed()) {
+                Log::info(
+                    'Task compled notify job already processed',
+                    [
+                        'idempotency_key' => $this->idempotencyKey,
+                        'task_id' => $this->task->id,
+                        'timestamp' => new \DateTimeImmutable()->format('c')
+                    ]
+                );
+                return;
+            }
+            $this->markAsProcessed();
+            Log::info(
+                'Task completed notify job processed',
+                [
                     'idempotency_key' => $this->idempotencyKey,
-                ]);
-            });
-            Log::info('completed!');
+                    'task_id' => $this->task->id,
+                    'timestamp' => new \DateTimeImmutable()->format('c'),
+                ]
+            );
             $this->saveNotification();
+        } catch (\Exception $exception) {
+            Log::error('Error at Task completed notify job', [
+                'idempotency_key' => $this->idempotencyKey,
+                'user_id' => $this->userId,
+                'error' => $exception->getMessage(),
+            ]);
+            throw $exception;
         }
     }
 
@@ -87,5 +120,12 @@ class TaskCompletedNotifyJob implements ShouldQueue
             'error' => $exception->getMessage(),
             'attempts' => $this->tries,
         ]);
+        $key = "failed_jobs:{$this->idempotencyKey}";
+        Redis::setex($key, 86400, json_encode([
+            'idempotency_key' => $this->idempotencyKey,
+            'task_id' => $this->task->id,
+            'user_id' => $this->userId,
+            'failed_at' => new \DateTimeImmutable()->format('c'),
+        ]));
     }
 }

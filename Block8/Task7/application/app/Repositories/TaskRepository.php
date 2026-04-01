@@ -39,14 +39,20 @@ class TaskRepository implements TaskRepositoryInterface
         if ($request->has('priority')) {
             $query->where('priority', $request->input('priority'));
         }
-        if ($request->has('due_date')) {
-            $query->where('due_date', '>=', $request->input('due_date'));
+        if ($request->has('due_date_from'))
+        {
+            $query->where('due_date', '>=', $request->input('due_date_from'));
+        }
+        if ($request->has('due_date_to')) {
+            $query->where('due_date', '<=', $request->input('due_date_to'));
         }
         if ($request->has('search')) {
-            $query->where('title', 'like', $request->input('search') . '%');
-        }
-        if ($request->has('project_id')) {
-            $query->where('project_id', $request->input('project_id'));
+            $search = $request->input('search');
+            $query->where(function ($queryParam) use ($search)
+            {
+                $queryParam->where('title', 'like', '%' . $search . '%')
+                    ->orWhere('description', 'like', '%' . $search . '%');
+            });
         }
         $tasks = $query->limit($limit + 1)->get();
         $hasMore = $tasks->count() > $limit;

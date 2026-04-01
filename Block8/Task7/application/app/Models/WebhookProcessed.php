@@ -10,7 +10,7 @@ use Final7\App\Models\Webhook;
 class WebhookProcessed extends Model
 {
     use HasFactory;
-    protected $table = 'webhook_processed';
+    protected $table = 'webhook_processeds';
     protected $guarded = false;
 
 

@@ -42,8 +42,7 @@ class WebhookListener
     public function handleBoth(Task $task, string $idempotencyKey, string $event): void
     {
         $project = Project::where('id', $task->project_id)->first();
-        if(!$project)
-        {
+        if (!$project) {
             Log::info('No project founded by edited task', [
                 'task_id' => $task->id,
                 'event' => $event,
@@ -52,8 +51,7 @@ class WebhookListener
             return;
         }
         $webhooksList = Webhook::where('project_id', $project->id)->where('enable', true)->orderBy('id')->get();
-        if(!$webhooksList)
-        {
+        if (!$webhooksList) {
             Log::info('No specified webhooks for current project', [
                 'project_id' => $project->id,
                 'event' => $event,
@@ -62,12 +60,10 @@ class WebhookListener
             return;
         }
 
-        foreach($webhooksList as $webhook)
-        {
+        foreach ($webhooksList as $webhook) {
             $attempt = WebhookAttempts::where('webhook_id', $webhook->id)
                 ->where('idempotency_key', $idempotencyKey)->first();
-            if($attempt)
-            {
+            if ($attempt) {
                 Log::info('Webhook attempt with current idempotency key was already processed', [
                     'webhook_id' => $webhook->id,
                     'idempotency_key' => $idempotencyKey,

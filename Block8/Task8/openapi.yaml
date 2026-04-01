@@ -73,6 +73,20 @@ components:
       schema:
         type: string
         maxLength: 255
+    DateFromParam:
+      name: date-from
+      in: query
+      description: 'Task date from select'
+      schema:
+        type: string
+        format: date-time
+    DateToParam:
+      name: date-to
+      in: query
+      description: 'Task date to param'
+      schema:
+        type: string
+        format: date-time
   schemas:
     User:
       type: object
@@ -732,6 +746,8 @@ paths:
         - $ref: '#/components/parameters/StatusParam'
         - $ref: '#/components/parameters/PriorityParam'
         - $ref: '#/components/parameters/SearchParam'
+        - $ref: '#/components/parameters/DateToParam'
+        - $ref: '#/components/parameters/DateFromParam'
         - name: due_date
           in: query
           description: 'Task list by filter'
