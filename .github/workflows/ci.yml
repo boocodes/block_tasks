@@ -33,22 +33,41 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y docker-compose
 
-      - name: Start services
+      - name: Copy .env
+        run: cp .env.example .env
+
+      - name: Start Docker Compose
         run: docker-compose up -d
 
       - name: Wait for database
         run: |
-          until docker exec CRUD_database mysqladmin ping -h localhost -uroot -proot --silent; do
-            echo "Waiting for database"
+          echo "Waiting for database..."
+          for i in {1..30}; do
+            if docker exec CRUD_database mysqladmin ping -h localhost -uroot -proot --silent 2>/dev/null; then
+              echo "Database is ready"
+              break
+            fi
+            echo "Attempt $i: Database not ready"
             sleep 3
           done
 
+      - name: Install dependencies
+        run: docker exec CRUD composer install --no-interaction --no-progress
+
+      - name: Generate app key
+        run: docker exec CRUD php artisan key:generate --force
+
+      - name: Run migrations
+        run: docker exec CRUD php artisan migrate --seed --force
+
       - name: Run tests
+        run: docker exec CRUD php artisan test
+
+      - name: Show logs on failure
+        if: failure()
         run: |
-          docker-compose exec -T app composer install --no-interaction
-          docker-compose exec -T app php artisan key:generate --force
-          docker-compose exec -T app php artisan migrate --seed --force
-          docker-compose exec -T app php artisan test
+          echo "=== Docker Compose logs ==="
+          docker-compose logs --tail=100
 
       - name: Cleanup
         if: always()
