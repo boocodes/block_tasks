@@ -8,8 +8,6 @@ on:
 jobs:
   lint:
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: true
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
@@ -20,6 +18,8 @@ jobs:
           php-version: '8.5'
           extensions: mbstring, pdo_mysql, redis, zip, gd
           tools: composer:v2
+      - name: Install Pint
+        run: composer require --dev laravel/pint --no-interaction
       
       - name: Run Pint
         run: pint
@@ -27,7 +27,6 @@ jobs:
   tests:
     runs-on: ubuntu-latest
     needs: lint
-    
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
