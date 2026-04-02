@@ -22,7 +22,7 @@ jobs:
         run: composer require --dev laravel/pint --no-interaction
       
       - name: Run Pint
-        run: pint
+        run: ./vendor/bin/pint
 
   tests:
     runs-on: ubuntu-latest
