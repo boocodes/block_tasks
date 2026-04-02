@@ -75,7 +75,6 @@ class WebhookReachedMaxAttemptsAndFailTest extends TestCase
 
         $attempts = WebhookAttempts::where('webhook_id', $webhook->id)
             ->first();
-        dump($attempts);
         $this->assertTrue($attempts !== null);
         $this->assertTrue($attempts->attempt === $attempts->max_attempts);
     }
