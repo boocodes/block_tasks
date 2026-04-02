@@ -18,6 +18,7 @@ jobs:
           php-version: '8.5'
           extensions: mbstring, pdo_mysql, redis, zip, gd
           tools: composer:v2
+      
       - name: Install Pint
         run: composer require --dev laravel/pint --no-interaction
       
@@ -27,6 +28,28 @@ jobs:
   tests:
     runs-on: ubuntu-latest
     needs: lint
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_DATABASE: application
+          MYSQL_ROOT_PASSWORD: root
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+      
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: --health-cmd="redis-cli ping" --health-interval=10s --health-timeout=5s --health-retries=3
+      
+      webhook-receiver:
+        image: webhook-receiver:latest
+        ports:
+          - 8081:81
+        options: --health-cmd="curl -f http://localhost:81/ || exit 1" --health-interval=10s --health-timeout=5s --health-retries=3
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -38,21 +61,30 @@ jobs:
           extensions: mbstring, pdo_mysql, redis, zip, gd, pcntl
           tools: composer:v2
 
-      - name: Install Docker Compose
+      - name: Build webhook-receiver image
+        run: |
+          docker build -t webhook-receiver:latest ./webhook-receiver
+          echo "✓ Webhook-receiver image built"
+
+      - name: Copy .env
+        run: cp .env.example .env
+
+      - name: Install dependencies
+        run: composer install --no-progress --no-suggest --prefer-dist --no-interaction
+        
+      - name: Generate app key
+        run: php artisan key:generate --force
+
+      - name: Install MySQL Client & Redis tools
         run: |
           sudo apt-get update
-          sudo apt-get install -y docker-compose
-
-      - name: Start services with Docker Compose
-        run: |
-          docker-compose -f docker-compose.yml up -d
-          echo "Services started"
+          sudo apt-get install -y mysql-client redis-tools curl
 
       - name: Wait for MySQL
         run: |
           echo "Waiting for MySQL to be ready"
           for i in {1..30}; do
-            if docker exec $(docker ps -q -f name=mysql) mysqladmin ping -h localhost -uroot -proot --silent; then
+            if mysqladmin ping -h 127.0.0.1 -uroot -proot --silent; then
               echo "MySQL is ready!"
               break
             fi
@@ -64,7 +96,7 @@ jobs:
         run: |
           echo "Waiting for Redis to be ready"
           for i in {1..30}; do
-            if docker exec $(docker ps -q -f name=redis) redis-cli ping; then
+            if redis-cli -h 127.0.0.1 ping; then
               echo "Redis is ready!"
               break
             fi
@@ -84,23 +116,16 @@ jobs:
             sleep 2
           done
 
-      - name: Copy .env
-        run: cp .env.example .env
-
-      - name: Install dependencies
-        run: composer install --no-progress --no-suggest --prefer-dist --no-interaction
-        
-      - name: Generate app key
-        run: php artisan key:generate --force
-
-      - name: Install MySQL Client
-        run: sudo apt-get install -y mysql-client
-
       - name: Create storage link
         run: php artisan storage:link
 
       - name: Clear config cache
         run: php artisan config:clear
+
+      - name: Add webhook-receiver alias to hosts
+        run: |
+          echo "127.0.0.1 webhook-receiver" | sudo tee -a /etc/hosts
+          cat /etc/hosts | grep webhook-receiver
 
       - name: Run migrations
         run: php artisan migrate --seed --force
@@ -115,11 +140,6 @@ jobs:
           QUEUE_CONNECTION: redis
           APP_ENV: testing
 
-      - name: Add webhook-receiver alias
-        run: |
-          echo "127.0.0.1 webhook-receiver" | sudo tee -a /etc/hosts
-          cat /etc/hosts | grep webhook-receiver
-
       - name: Test webhook-receiver
         run: |
           echo "Testing webhook-receiver endpoints"
@@ -128,15 +148,30 @@ jobs:
           SECRET='secret-test'
           SIGNATURE=$(echo -n "$PAYLOAD" | openssl dgst -sha256 -hmac "$SECRET" | awk '{print $2}')
           
+          # Тест через localhost:8081
           HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -X POST http://localhost:8081/ \
             -H "Content-Type: application/json" \
             -H "X-Webhook-Signature: $SIGNATURE" \
             -d "$PAYLOAD")
           
           if [ "$HTTP_CODE" = "200" ]; then
-            echo "Webhook-receiver works correctly"
+            echo "✓ Webhook-receiver works via localhost:8081"
           else
-            echo "Webhook-receiver returned $HTTP_CODE"
+            echo "✗ Webhook-receiver returned $HTTP_CODE"
+            exit 1
+          fi
+          
+          # Тест через webhook-receiver:81 (нужно для тестов)
+          echo "Testing webhook-receiver:81..."
+          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -X POST http://webhook-receiver:81/ \
+            -H "Content-Type: application/json" \
+            -H "X-Webhook-Signature: $SIGNATURE" \
+            -d "$PAYLOAD")
+          
+          if [ "$HTTP_CODE" = "200" ]; then
+            echo "✓ webhook-receiver:81 works correctly"
+          else
+            echo "✗ webhook-receiver:81 returned $HTTP_CODE"
             exit 1
           fi
 
@@ -154,7 +189,16 @@ jobs:
           APP_ENV: testing
           APP_URL: http://localhost:8000
 
+      - name: Show logs on failure
+        if: failure()
+        run: |
+          echo "=== Webhook receiver logs ==="
+          docker logs $(docker ps -q -f name=webhook-receiver) --tail 50 2>/dev/null || echo "No logs"
+          echo "=== Application logs ==="
+          cat storage/logs/laravel.log 2>/dev/null | tail -50 || echo "No logs found"
+
       - name: Cleanup
         if: always()
         run: |
-          docker-compose -f docker-compose.yml down -v
+          docker stop $(docker ps -q -f name=webhook-receiver) 2>/dev/null || true
+          docker rm $(docker ps -q -f name=webhook-receiver) 2>/dev/null || true
